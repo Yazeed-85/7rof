@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>شبكة الحروف</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: Arial, sans-serif; }
+    .main-container { position: relative; width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; }
+    .grid-container { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+    .hex-cell { cursor: pointer; transition: transform 0.2s; }
+    .hex-cell:active { transform: scale(0.9); }
+    
+    /* منع اللمس للاعبين */
+    body.player-mode .hex-cell { cursor: not-allowed; pointer-events: none; }
+    body.player-mode .host-tools { display: none !important; }
+
+    .host-tools { display: flex; gap: 10px; margin-bottom: 20px; z-index: 10; position: absolute; top: -10px;}
+    .tool-btn { padding: 10px 20px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+    .btn-green { background: #4CAF50; }
+    .btn-orange { background: #FF9800; }
+    .btn-shuffle { background: #333; }
+    .selected { box-shadow: 0 0 10px 3px black; transform: scale(1.1); }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    
+    <div class="host-tools">
+      <button class="tool-btn btn-shuffle" onclick="shuffleLetters()">🔀 خلط الحروف</button>
+      <button id="colorGreen" class="tool-btn btn-green selected" onclick="selectColor('#4CAF50', this)">أخضر</button>
+      <button id="colorOrange" class="tool-btn btn-orange" onclick="selectColor('#FF9800', this)">برتقالي</button>
+      <button id="colorClear" class="tool-btn" style="background:#ddd; color:#000;" onclick="selectColor('url(#hexGradient)', this)">مسح</button>
+    </div>
+
+    <div class="grid-container" id="hexGrid">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="100%" height="400">
+        <defs>
+          <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#e0e0e0" stop-opacity="0.9"/>
+          </linearGradient>
+        </defs>
+        
+        <g class="hex-cell" data-index="0"><path d="M100,100 L130,83 L160,100 L160,134 L130,151 L100,134 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="130" y="125" font-size="22" font-weight="bold" text-anchor="middle">أ</text></g>
+        <g class="hex-cell" data-index="1"><path d="M160,100 L190,83 L220,100 L220,134 L190,151 L160,134 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="190" y="125" font-size="22" font-weight="bold" text-anchor="middle">ب</text></g>
+        <g class="hex-cell" data-index="2"><path d="M220,100 L250,83 L280,100 L280,134 L250,151 L220,134 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="250" y="125" font-size="22" font-weight="bold" text-anchor="middle">ت</text></g>
+        <g class="hex-cell" data-index="3"><path d="M280,100 L310,83 L340,100 L340,134 L310,151 L280,134 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="310" y="125" font-size="22" font-weight="bold" text-anchor="middle">ث</text></g>
+        <g class="hex-cell" data-index="4"><path d="M340,100 L370,83 L400,100 L400,134 L370,151 L340,134 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="370" y="125" font-size="22" font-weight="bold" text-anchor="middle">ج</text></g>
+        
+        <g class="hex-cell" data-index="5"><path d="M70,151 L100,134 L130,151 L130,185 L100,202 L70,185 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="100" y="176" font-size="22" font-weight="bold" text-anchor="middle">ح</text></g>
+        <g class="hex-cell" data-index="6"><path d="M130,151 L160,134 L190,151 L190,185 L160,202 L130,185 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="160" y="176" font-size="22" font-weight="bold" text-anchor="middle">خ</text></g>
+        <g class="hex-cell" data-index="7"><path d="M190,151 L220,134 L250,151 L250,185 L220,202 L190,185 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="220" y="176" font-size="22" font-weight="bold" text-anchor="middle">د</text></g>
+        <g class="hex-cell" data-index="8"><path d="M250,151 L280,134 L310,151 L310,185 L280,202 L250,185 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="280" y="176" font-size="22" font-weight="bold" text-anchor="middle">ذ</text></g>
+        <g class="hex-cell" data-index="9"><path d="M310,151 L340,134 L370,151 L370,185 L340,202 L310,185 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="340" y="176" font-size="22" font-weight="bold" text-anchor="middle">ر</text></g>
+
+        <g class="hex-cell" data-index="10"><path d="M100,202 L130,185 L160,202 L160,236 L130,253 L100,236 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="130" y="227" font-size="22" font-weight="bold" text-anchor="middle">ز</text></g>
+        <g class="hex-cell" data-index="11"><path d="M160,202 L190,185 L220,202 L220,236 L190,253 L160,236 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="190" y="227" font-size="22" font-weight="bold" text-anchor="middle">س</text></g>
+        <g class="hex-cell" data-index="12"><path d="M220,202 L250,185 L280,202 L280,236 L250,253 L220,236 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="250" y="227" font-size="22" font-weight="bold" text-anchor="middle">ش</text></g>
+        <g class="hex-cell" data-index="13"><path d="M280,202 L310,185 L340,202 L340,236 L310,253 L280,236 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="310" y="227" font-size="22" font-weight="bold" text-anchor="middle">ص</text></g>
+        <g class="hex-cell" data-index="14"><path d="M340,202 L370,185 L400,202 L400,236 L370,253 L340,236 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="370" y="227" font-size="22" font-weight="bold" text-anchor="middle">ض</text></g>
+
+        <g class="hex-cell" data-index="15"><path d="M70,253 L100,236 L130,253 L130,287 L100,304 L70,287 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="100" y="278" font-size="22" font-weight="bold" text-anchor="middle">ط</text></g>
+        <g class="hex-cell" data-index="16"><path d="M130,253 L160,236 L190,253 L190,287 L160,304 L130,287 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="160" y="278" font-size="22" font-weight="bold" text-anchor="middle">ظ</text></g>
+        <g class="hex-cell" data-index="17"><path d="M190,253 L220,236 L250,253 L250,287 L220,304 L190,287 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="220" y="278" font-size="22" font-weight="bold" text-anchor="middle">ع</text></g>
+        <g class="hex-cell" data-index="18"><path d="M250,253 L280,236 L310,253 L310,287 L280,304 L250,287 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="280" y="278" font-size="22" font-weight="bold" text-anchor="middle">غ</text></g>
+        <g class="hex-cell" data-index="19"><path d="M310,253 L340,236 L370,253 L370,287 L340,304 L310,287 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="340" y="278" font-size="22" font-weight="bold" text-anchor="middle">ف</text></g>
+
+        <g class="hex-cell" data-index="20"><path d="M100,304 L130,287 L160,304 L160,338 L130,355 L100,338 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="130" y="329" font-size="22" font-weight="bold" text-anchor="middle">ق</text></g>
+        <g class="hex-cell" data-index="21"><path d="M160,304 L190,287 L220,304 L220,338 L190,355 L160,338 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="190" y="329" font-size="22" font-weight="bold" text-anchor="middle">ك</text></g>
+        <g class="hex-cell" data-index="22"><path d="M220,304 L250,287 L280,304 L280,338 L250,355 L220,338 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="250" y="329" font-size="22" font-weight="bold" text-anchor="middle">ل</text></g>
+        <g class="hex-cell" data-index="23"><path d="M280,304 L310,287 L340,304 L340,338 L310,355 L280,338 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="310" y="329" font-size="22" font-weight="bold" text-anchor="middle">م</text></g>
+        <g class="hex-cell" data-index="24"><path d="M340,304 L370,287 L400,304 L400,338 L370,355 L340,338 Z" fill="url(#hexGradient)" stroke="black" stroke-width="1.5"/><text x="370" y="329" font-size="22" font-weight="bold" text-anchor="middle">ن</text></g>
+      </svg>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyB5CobIKfYdAz8jaabJpMQrGoqS9Ton28Y",
+        authDomain: "buttons-f3501.firebaseapp.com",
+        databaseURL: "https://buttons-f3501-default-rtdb.firebaseio.com",
+        projectId: "buttons-f3501"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // جلب الإعدادات من الرابط
+    const urlParams = new URLSearchParams(window.location.search);
+    const pin = urlParams.get('pin');
+    const role = urlParams.get('role'); // host أو player
+
+    // تطبيق حماية اللاعب
+    if (role === 'player') {
+        document.body.classList.add('player-mode');
+    }
+
+    const gridRef = ref(database, `rooms/${pin}/grid`);
+    let activePaintColor = "#4CAF50"; // افتراضي أخضر
+
+    // الاستماع المباشر للشبكة
+    onValue(gridRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.querySelectorAll(".hex-cell").forEach((cell, index) => {
+                const cellData = data[index];
+                if (cellData) {
+                    const text = cell.querySelector("text");
+                    const path = cell.querySelector("path");
+                    if (text && cellData.letter) text.textContent = cellData.letter;
+                    if (path) path.setAttribute("fill", cellData.color || "url(#hexGradient)");
+                }
+            });
+        }
+    });
+
+    // أدوات الهوست للتحكم
+    if (role === 'host') {
+        window.selectColor = function(color, btn) {
+            activePaintColor = color;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        };
+
+        document.querySelectorAll(".hex-cell").forEach((cell) => {
+            cell.addEventListener("click", function() {
+                const index = this.getAttribute("data-index");
+                const path = this.querySelector("path");
+                const letter = this.querySelector("text").textContent;
+                
+                // تحديث مباشر في فايربيز (سينعكس عند الكل فوراً)
+                set(ref(database, `rooms/${pin}/grid/${index}`), {
+                    letter: letter,
+                    color: activePaintColor
+                });
+            });
+        });
+
+        window.shuffleLetters = function() {
+            const letters = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
+            // خلط المصفوفة
+            for (let i = letters.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [letters[i], letters[j]] = [letters[j], letters[i]];
+            }
+            
+            const updates = {};
+            document.querySelectorAll(".hex-cell").forEach((cell, index) => {
+                updates[index] = { letter: letters[index] || "؟", color: "url(#hexGradient)" };
+            });
+            set(gridRef, updates);
+        };
+    }
+  </script>
+</body>
+</html>
