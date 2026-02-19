@@ -6,11 +6,16 @@
     <title>شاشة الهوست</title>
     <style>
         body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { display: flex; justify-content: center; width: 100%; max-width: 900px; margin-bottom: 20px; }
+        .header { display: flex; justify-content: center; width: 100%; max-width: 900px; margin-bottom: 20px; position: relative;}
+        
+        /* زر بنك الأسئلة الجديد للهوست */
+        .questions-btn { position: absolute; left: 0; top: 0; background: linear-gradient(135deg, #2a6496, #1c4c7c); color: white; border: none; padding: 12px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;}
+        .questions-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.4);}
+        .questions-btn:active { transform: scale(0.95); }
+
         .pin-box { background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 15px; border: 2px dashed #fbbf24; text-align: center;}
         .pin-display { font-size: 2.5rem; font-weight: bold; color: #fbbf24; letter-spacing: 5px; }
         
-        /* حالة الزر (صارت أذكى) */
         .buzzer-status { width: 100%; max-width: 900px; padding: 20px; border-radius: 15px; text-align: center; font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; background: #334155; border: 2px solid #475569; transition: background 0.3s;}
         
         .action-btns { display: none; gap: 15px; margin-top: 15px; justify-content: center; }
@@ -48,16 +53,13 @@
         let serverTimeOffset = 0;
         let currentState = { status: 'waiting' };
 
-        // مزامنة وقت السيرفر بدقة عالية
         onValue(ref(db, ".info/serverTimeOffset"), (snap) => {
             serverTimeOffset = snap.val() || 0;
         });
         function getServerTime() { return Date.now() + serverTimeOffset; }
 
-        // تهيئة الغرفة عند الدخول
         set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
 
-        // الاستماع لحالة اللعبة
         onValue(buzzerRef, (snapshot) => {
             if (snapshot.exists()) {
                 currentState = snapshot.val();
@@ -76,7 +78,6 @@
                 actions.style.display = "flex";
             } else if (currentState.status === 'penalty') {
                 actions.style.display = "none";
-                // يتم تحديث النص عبر setInterval
             } else {
                 statusBox.innerText = "🟢 في انتظار الضغطات (اللعب مفتوح للجميع)";
                 statusBox.style.backgroundColor = "#334155";
@@ -85,7 +86,6 @@
             }
         }
 
-        // السيرفر (من خلال الهوست) هو من يفك العقوبة تلقائياً بعد 5 ثواني
         setInterval(() => {
             if (currentState.status === 'penalty' && currentState.lockedTeam) {
                 const timeLeft = Math.ceil((currentState.unlockTime - getServerTime()) / 1000);
@@ -96,18 +96,15 @@
                     statusBox.innerText = `⏳ عقوبة الفريق ${tName} تنتهي بعد: ${timeLeft} ثواني`;
                     statusBox.style.backgroundColor = "#475569";
                 } else {
-                    // السيرفر يحرر الجميع فوراً
                     set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
                 }
             }
         }, 100);
 
-        // إجابة صحيحة (تحرير الأزرار للسؤال التالي)
         window.answerCorrect = function() {
             set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
         };
 
-        // إجابة خاطئة (تطبيق عقوبة 5 ثواني للفريق الذي أخطأ)
         window.answerWrong = function() {
             const unlockTimestamp = getServerTime() + 5000; 
             set(buzzerRef, { 
@@ -120,14 +117,20 @@
             });
         };
 
-        // زر التحرير اليدوي للطوارئ
         window.resetBuzzer = function() {
             set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
+        };
+
+        // دالة فتح بنك الأسئلة في نافذة منبثقة
+        window.openQuestions = function() {
+            // يفتح ملف questions.html في نافذة جديدة بحجم مناسب
+            window.open('questions.html', '_blank', 'width=800,height=700,scrollbars=yes');
         };
     </script>
 </head>
 <body>
     <div class="header">
+        <button class="questions-btn" onclick="openQuestions()">📖 فتح بنك الأسئلة</button>
         <div class="pin-box">
             <div style="color: #94a3b8; font-size: 1rem;">كود الغرفة</div>
             <div class="pin-display" id="pinDisplay">----</div>
