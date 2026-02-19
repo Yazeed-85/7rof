@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحروف العربية والأسئلة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #2a6496;
+            --primary-hover: #1c4c7c;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #2c3e50;
+            --light-text: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(to left, var(--primary-color), var(--primary-hover));
+            color: white;
+            border-radius: 0 0 50% 50% / 20px;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .letters-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            perspective: 1000px;
+        }
+        
+        .letter-box {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform-style: preserve-3d;
+        }
+        
+        .letter-box::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            z-index: -1;
+        }
+        
+        .letter-box::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2));
+            z-index: 1;
+        }
+        
+        .letter-box span {
+            color: white;
+            z-index: 2;
+            transform: translateZ(20px);
+        }
+        
+        .letter-box:hover {
+            transform: translateY(-5px) rotateY(10deg);
+            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .letter-box.active {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+        
+        .questions-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 0 auto;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .questions-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .questions-title {
+            color: var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .questions-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        .current-letter {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            line-height: 40px;
+            margin: 0 5px;
+            text-align: center;
+        }
+        
+        .question-item {
+            background-color: var(--light-bg);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transform: translateX(20px);
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+        }
+        
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .question-item:nth-child(odd) {
+            transform: translateX(-20px);
+        }
+        
+        .question {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            cursor: pointer;
+            position: relative;
+            padding-right: 25px;
+        }
+        
+        .question::before {
+            content: '\f107';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            transition: transform 0.3s;
+        }
+        
+        .question.active::before {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        
+        .answer {
+            color: var(--secondary-color);
+            margin-top: 10px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .answer.show {
+            max-height: 100px;
+            opacity: 1;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .back-button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .letter-box {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .questions-container {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .letter-box {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .questions-title {
+                font-size: 1.3rem;
+            }
+        }
+        /* إضافة أنماط للأسئلة المميزة - أضف هذا الكود في قسم الـ style */
+.question-item.answered {
+    border-right: 4px solid var(--secondary-color);
+    background-color: rgba(231, 76, 60, 0.1);
+    position: relative;
+}
+
+.question-item.answered .question {
+    font-weight: 600;
+}
+
+.question-item.skipped {
+    border-right: 4px solid var(--accent-color);
+    background-color: rgba(243, 156, 18, 0.1);
+    opacity: 0.7;
+    position: relative;
+}
+
+/* أنماط للأزرار */
+.mark-button {
+    padding: 5px 10px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.answered-button {
+    background-color: var(--secondary-color);
+    margin-right: 10px;
+}
+
+.answered-button:hover {
+    background-color: #c0392b;
+}
+
+.skipped-button {
+    background-color: var(--accent-color);
+}
+
+.skipped-button:hover {
+    background-color: #d35400;
+}
+
+.button-container {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+}
+/* أنماط محسنة للأزرار والتفاعلات */
+.question-actions {
+    display: flex;
+    margin-top: 12px;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+}
+
+.question-item:hover .question-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.action-button i {
+    margin-left: 6px;
+    font-size: 0.9rem;
+}
+
+.answer-button {
+    background: linear-gradient(135deg, var(--secondary-color), #c0392b);
+    color: white;
+}
+
+.answer-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.skip-button {
+    background: linear-gradient(135deg, var(--accent-color), #d35400);
+    color: white;
+}
+
+.skip-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+}
+
+/* تحسين شكل الأسئلة المميزة */
+.question-item {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.question-item.answered {
+    border-right: 4px solid var(--secondary-color);
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.question-item.answered::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--secondary-color), #c0392b);
+    border-radius: 0 0 0 4px;
+}
+
+.question-item.answered .question::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 10px;
+    color: var(--secondary-color);
+    font-size: 1rem;
+}
+
+.question-item.skipped {
+    border-right: 4px solid var(--accent-color);
+    background-color: rgba(243, 156, 18, 0.05);
+    opacity: 0.85;
+}
+
+.question-item.skipped::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--accent-color), #d35400);
+    border-radius: 0 0 0 4px;
+}
+
+.question-item.skipped .question::after {
+    content: '\f00d';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 10px;
+    color: var(--accent-color);
+    font-size: 1rem;
+}
+@keyframes ripple-effect {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>الحروف العربية والأسئلة</h1>
+        <div class="subtitle">اختر حرفاً لترى أسئلة تبدأ إجاباتها بهذا الحرف</div>
+    </header>
+    
+    <div class="container">
+        <div class="letters-container" id="letters">
+            <!-- سيتم إنشاء الحروف هنا من خلال جافا سكريبت -->
+        </div>
+        
+        <div class="questions-container hidden" id="questions-container">
+            <h2 class="questions-title" id="questions-title">
+                أسئلة إجاباتها بحرف <span class="current-letter" id="current-letter"></span>
+            </h2>
+            
+            <div id="questions-list">
+                <!-- سيتم إضافة الأسئلة هنا -->
+            </div>
+            
+            <button class="back-button" id="back-button">
+                <i class="fas fa-arrow-right"></i> العودة للحروف
+            </button>
+        </div>
+        
+        <footer>
+            &copy; 2025 - لعبة الحروف العربية والأسئلة - جميع الحقوق محفوظة
+        </footer>
+    </div>
+
+    <script>
+        // قائمة الحروف العربية
+        const arabicLetters = ['أ', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي'];
+        
+        // قاموس يحتوي على الأسئلة والأجوبة لكل حرف
+        const questionsAndAnswers = {
+    'أ': [
+
+                { question: "نبي سميت سورة من القران بأسمه؟", answer: "إبراهيم" },
+                 { question: "غزوة جرح فيها رسول الله صلى الله عليه وسلم وكسرت رباعيته وأشيع فيها أنه قتل؟", answer: "أحد" },
+                 { question: "أول من جمع القرآن الكريم بين لوحين؟", answer: "أبو بكر الصديق" },
+                 { question: "كنية تكنى بها أسد الله حمزة بن عبد المطلب عم رسول الله صلى الله عليه وسلم وسيد الشهداء؟", answer: "أبو عمارة" },
+                 { question: "من القائل : ( ما أحد يحمل محبرةً وإلا للشافعي عليه منّةٌ )؟", answer: "أحمد بن حنبل" },
+                 { question: "يطلق على صوت المرجل؟", answer: "أزيز" },
+                 { question: "لقب أطلقه أهل مكة على محمد سول الله صلى الله عليه وسلم قبل الإسلام؟", answer: "الأمين" },
+                 { question: "صحابي جليل فرض له عمر بن الخطاب - رضي الله عنه - أكثر مما فرض لابنه؟", answer: "أسامة بن زيد" },
+                 { question: "الصحابية التي لقبت بـ ( مهاجرة الهجرتين )؟", answer: "أسماء بنت عميس" },
+                 { question: "حيوان يطلق عليه ( أسامة )", answer: "الأسد" },
+                 { question: "شاعر جاهلي لقب قبل موته بـ ( ذي القروح )؟", answer: "امرؤ القيس" },
+                 { question: "من القائل : فيا ليت الشباب يعود يوماً *** فأخبره بما فعل المشيب؟", answer: "أبو العتاهية" },
+                 { question: "مؤلف كتاب (( لسان العرب ))", answer: "ابن منظور" },
+                 { question: "الفيلسوف الذي أطلق عليه لقب المعلم الأول؟", answer: "أرسطو" },
+                 { question: "كنية لآدم - عليه السلام -؟", answer: "أبو البشر" },
+                 { question: "اسم للعاصمة الفلبينية ( مانيلا ) قبل أن تسمى بهذا الاسم؟", answer: " (أمان الله) قبل أن يعيد المستعمرون الإسبان تسمية مانيلا عام 1571، كانت العاصمة الفلبينية تُعرف باسم أمان الله، أي “أمان الله”، تحت حكم راجا سليمان المسلم. كان هذا الاسم يعبر عن مدينة متجذرة في الإيمان" },
+                 { question: "مؤسس علم الاجتماع من أشهر كتبه(العبر وديوان المبتدأ والخبر )؟", answer: "ابن خلدون" },
+                 { question: "أول من سمى القرآن الكريم مصحفاً؟", answer: "أبو بكر الصديق" },
+                 { question: "بحار عربي لقب بأسد البحار؟", answer: "أحمد بن ماجد" },
+                 { question: "وحدة لقياس شدة التيار الكهربائي؟", answer: "الأمبير" },
+                 { question: "الاسم الذي كان يطلق على أسبانيا قديما؟", answer: "الأندلس" },
+                 { question: "كنية تكنى بها أنثى الثعلب؟", answer: "أم عويل" },
+                 { question: "من الصحابة لقب بسيد القراء؟", answer: "أبي بن كعب" },
+                 { question: "سيدا كهول أهل الجنة أحدهما عمر بن الخطاب . فمن الآخر؟", answer: "أبو بكر الصديق" },
+                 { question: "اسم يطلق على العملة البرتغالية؟", answer: "إسكودو" },         
+                { question: "أبو البشر؟", answer: "ادم" },
+                { question: "مادة تصنع من مزج الماء والرمل والحصى والثراب؟", answer: "اسمنت" },
+                { question: "زوجة فرعون ما اسمها؟", answer: "اسيا" },
+                { question: "ما هو اللقب الذى أطلق على حمزة؟", answer: "اسد الله" },
+                { question: "ما هى كنية العباس عم النبي صلى الله عليه وسلم؟", answer: "أبوالفضل" },
+                { question: "من اخترع المصباح الكهربائى؟", answer: "اديسون" },
+                { question: "ما هي القارة الأصغر في العالم، قياسًا بالمساحة؟", answer: "قارة اوروبا" },
+                { question: "ما هي اللغة الرسمية في النمسا؟", answer: " اللغة الألمانية. " },
+                { question: "ما هي أعلى قمة في العالم؟", answer: " إيفرست" }
+
+            ],
+            'ب': [
+                { question: "اسم يطلق على نوع من الصقور ؟", answer: "الباز" },
+                { question: "سورة من سور القرآن الكريم يطلق عليها سنام القرآن؟", answer: "البقرة" },
+                { question: "عالم مسلم هو أول من اكتشف أن سرعة الضوء أكبر من سرعة الصوت", answer: "البيروني" },
+                { question: "الحرب التي حدثت في الجاهلية واستمرت قرابة الأربعين عاماً وقد وقعت بين قبيلتي بكر وتغلب؟", answer: "البسوس" },
+                { question: "من بحور الشعر العربي؟", answer: "البسيط" },
+                { question: "شاعر أعمى كان دقيقاً في وصف المعارك والحروب ولم يشارك في أي معركة؟", answer: "بشار بن برد" },
+                { question: "مقياس أو وحدة طول تساوي جزءً واحداً من اثني عشر جزءً من القدم؟", answer: "البوصة" },
+                { question: "عملة إثيوبيا؟", answer: "بير" },
+                { question: "ما عاصمة كولومبيا؟", answer: "بوجوتا" },
+                { question: "مدينة أوروبية أقيمت فيها أول دورة أولمبية عام 1900 م؟", answer: "باريس" },
+                { question: "لقب أطلق على السيدة مريم أم نبي الله عيسى عليه السلام؟", answer: "البتول" },
+                { question: "يطلق على أطول عظمة في إبهام القدم؟", answer: "البوع" },
+                { question: "دولة في أمريكا اللاتينية هي الدولة الوحيدة التي تتكلم البرتغالية؟", answer: "البرازيل" },
+                { question: "أبعد الكواكب عن الشمس تم اكتشافه في مطلع القرن العشرين؟", answer: "بلوتو" },
+                { question: "في القرآن الكريم ذكر لفظ الزمهرير فما معناه؟", answer: "البرد الشديد" },
+                { question: "الدولة التي يقع فيها مقر وكالة أنباء الخليج؟", answer: "البحرين" },
+                { question: "من الدول التي تمتلك حق النقض (الفيتو)؟", answer: "بريطانيا" },            
+                { question: "الي ماذا يشير مصطلح الذهب الاسود؟", answer: "البترول " }
+            ],
+            'ت': [
+            { question: "سورة في القرآن الكريم ابتدأت باسم ثمرتين؟", answer: "التين" },
+{ question: "أعلى هضبة في العالم هضبة؟", answer: "التبت" },
+{ question: "عاصمة الصين الوطنية؟", answer: "تايبيه" },
+{ question: "أكمل هذه العبارة المشهورة (تاج المروءة)؟", answer: "التواضع" },
+{ question: "مدينة إيرانية فيها مسجد يطلق عليه المسجد الأزرق وهذا المسجد من آثار المسلمين الأولى في تلك البلاد؟", answer: "تبريز" },
+{ question: "مدينة يمنية مشهورة، من أشهر معالمها جبل صبر؟", answer: "تعز" },
+{ question: "يستخدم في رؤية الأجسام البعيدة جداً؟", answer: "تلسكوب" },
+{ question: "مبنى يستعمل في تسوية الخبز؟", answer: "تنور" },
+{ question: "آلة حربية كانت تستخدم في الدفاع عن المدن قديماً؟", answer: "ترس" },
+{ question: "التوسع في المال والعلم؟", answer: "تورع" },
+{ question: "مقبرة هندية مبنية من الرخام الأبيض تعتبر من عجائب الدنيا السبع؟", answer: "تاج محل" },
+{ question: "الفاضحة والمبعثرة اسمان لسورة من القرآن؟", answer: "التوبة" },
+{ question: "من المعجمات العربية المشهورة لأبي بكر الزبيدي؟", answer: "تاج العروس" },
+{ question: "عاصمة جمهورية جورجيا؟", answer: "تفليس" }
+
+            ],
+            'ث': [
+            { question: "يطْلَق على المرأة التي سبق لها الزواج؟", answer: "ثيب" },
+{ question: "الغاز الذي يستعمل في إطفاء الحرائق؟", answer: "ثاني أكسيد الكربون" },
+{ question: "مضاد حيوي طبيعي يستخدم في الطعام والدواء؟", answer: "الثوم" },
+{ question: "من خطباء المسلمين الأوائل لقب بخطيب الرسول - صلى الله عليه وسلم -؟", answer: "ثابت بن قيس" },
+{ question: "صفة من أهم صفات الشجاعة؟", answer: "الثبات" },
+{ question: "هي صفه تدل على اضطراب تواصل يُؤدي إلى إفراطٍ في النُطق مع تكرارٍ للكلام؟", answer: "الثرثرة" },
+{ question: "يطلق في اللغة على الجماعة من الناس؟", answer: "ثلة" },
+{ question: "الجهاز الذي تسجل به حرارة الجو بطريقة آلية؟", answer: "ثرموجراف" },
+{ question: "كلمة تستطيع أن تقرأها من اليمين والشمال؟", answer: "ثلث" },
+{ question: "يطلق على مجموعة النجوم المتلاصقة؟", answer: "الثريا" },
+{ question: "في اللغة بمعنى الحمقاء؟", answer: "الثَّأطاء" },
+{ question: "من المظاهر الفلكية في الكون التي حيرت العلماء؟", answer: "الثقوب السوداء" },
+{ question: "الماء السائل سيلاناً شديدا؟", answer: "ثجاج" },
+{ question: "مرض يصيب فروة شعر الإنسان؟", answer: "ثعلبة" },
+            ],
+            'ج': [
+                { question: "هو عالم عربي مشهور يلقب بأبي الكيمياء؟", answer: "جابر بن حيان " },
+                { question: "من هو مؤسس الإمبراطورية المغولية؟", answer: "جنكيز خان" },
+                { question: "نقيب المهاجرين الذين هاجروا إلى الحبشة وخطيبهم والناطق بلسانهم؟", answer: "جعفر بن أبي طالب" },
+{ question: "اسم الصحابي الجليل الذي يكنى بأبي ذر الغفاري؟", answer: "جندب بن جنادة" },
+{ question: "ذروة سنام الإسلام؟", answer: "الجهاد في سبيل الله" },
+{ question: "أهجى شعراء العرب؟", answer: "جرير" },
+{ question: "أكبر جزيرة في العالم؟", answer: "جرين لاند" },
+{ question: "مكتشف قارة آسيا؟", answer: "جيمس كوك" },
+{ question: "عالم عربي مشهور يلقب بأبي الكيمياء؟", answer: "جابر بن حيان" },
+{ question: "يهودي مجرم نفذ مذبحة الحرم الإبراهيمي وقتل فيها عشرات المصلين أثناء تأديتهم الصلاة؟", answer: "جولد اشتاين" },
+{ question: "مؤسس الإمبراطورية المغولية؟", answer: "جنكيز خان" },
+{ question: "القبيلة التي تنتمي إليها زرقاء اليمامة مضرب المثل في قوة البصر؟", answer: "جديس" },
+{ question: "يطلق على الثلاثة والثلاثون عاماً؟", answer: "جيل" },
+{ question: "العلم الذي يعنى بعلم طبقات الأرض؟", answer: "جيولوجيا" },
+{ question: "علم مسح الأرض؟", answer: "جيوديسيا" },
+{ question: "من المعاجم العربية لأحمد فارس الشدياق المتوفى 1888 م؟", answer: "الجاسوس على القاموس" },
+{ question: "مدينة عربية فيها أعلى نافورة في العالم؟", answer: "جدة" },
+{ question: "يطلق على البئر الذي لم يبن بالحجارة؟", answer: "جب" },
+{ question: "آخر ملوك الغساسنة أسلم ثم ارتد وتنصر؟", answer: "جبلة بن الأيهم" },
+{ question: "من المؤلفات المهمة لفضيلة الشيخ محمد الغزالي رحمه الله تعالى؟", answer: "جدد حياتك" },
+{ question: "أول ميناء نفطي في أبو ظبي؟", answer: "جبل الظنة" },
+{ question: "المخترع الألماني الذي اخترع أول مطبعة ذات حروف؟", answer: "جوتنبرغ" },
+{ question: "العالم الفرنسي الذي الذي اكتشف البنسلين؟", answer: "جرهارت" },
+{ question: "امرأة شغلت منصب رئيس الوزراء في الكيان الصهيوني؟", answer: "جولد مائير" },
+{ question: "اسم الشاعر الملقب (الحطيئة)؟", answer: "جرول بن أوس" },
+{ question: "وحدة أساسية لانتقال الصفات الوراثية في الحيوان والنبات؟", answer: "جينات" },
+{ question: "من أسماء الصخر؟", answer: "جلمود" },
+{ question: "في اللغة يطلق على أشد الحرص؟", answer: "الجشع" },
+{ question: "مخترع آلة التصوير الفوتوغرافي؟", answer: "جورج إيستمان" },
+{ question: "من المعاجم المشهورة لابن دريد البصري؟", answer: "الجمهرة" },
+{ question: "مدينة يطلق عليها مدينة الذهب؟", answer: "جوهانسبرج" },
+{ question: "المحامي الفرنسي الذي أسس بطولة كأس العالم لكرة القدم؟", answer: "جول ريميه" },
+            ],
+            'ح': [
+            { question: "سورة في القرآن الكريم ورد فيها ذكر الذباب؟", answer: "الحج" },
+{ question: "غزوة عقد رسول الله- صلى الله عليه وسلم - لواءها لعلي بن أبي طالب رضي الله عنه؟", answer: "حمراء الأسد" },
+{ question: "امرأة في الجاهلية ضرب بها المثل في صدق الخبر؟", answer: "حذام" },
+{ question: "وحدة لقياس القدرة تساوي 550رطل/ قدم في الثانية ويقاس بها قوة المحركات؟", answer: "الحصان" },
+{ question: "صحابي جليل انتدبه رسول الله- صلى الله عليه وسلم - لأتيه بخبر المشركين في غزوة الأحزاب بعد أن هبت ريح دمرت أمتعتهم وشتت جمعهم؟", answer: "حذيفة بن اليمان" },
+{ question: "يطلق على صوت المحتضر؟", answer: "حشرجة" },
+{ question: "شاعر اشتهر بالهجاء حبسه أمير المؤمنين عمر بن الخطاب رضي الله عنه وقيل: أنه اشترى منه أعراض المسلمين بثلاثة آلاف درهم وهدد إن عاد قطع لسانه؟", answer: "الحطيئة" },
+{ question: "اسم الشيماء أخت الرسول- صلى الله عليه وسلم - من الرضاعة؟", answer: "حذافة بنت الحارث" },
+{ question: "من تلاميذ الإمام الشافعي, يلقب بالشيباني, آراءه الفقهية مستمدة مباشرة من الحديث الشريف، له مسند باسمه، اشتهر مذهبه بالمذهب؟", answer: "الحنبلي" },
+{ question: "قرية عراقية كردية قام النظام العراقي البعثي بقصفها بالغازات السامة والأسلحة الكيماوية مما أدى إلى قتل خمسة آلاف فرد غير الإصابات الخطيرة؟", answer: "حلبجة" },
+{ question: "حامل رسالة رسول الله- صلى الله عليه وسلم - إلى المقوقس ملك مصر؟", answer: "حاطب بن أبي بلتعة" },
+{ question: "من عجائب الدنيا السبع؟", answer: "حدائق بابل المعلقة" },
+{ question: "قال الله تعالى في سورة التحريم مخاطباً زوجتين لرسول الله - صلى الله عليه وسلم - (إِن تَتُوبَا إِلَى اللَّهِ فَقَدْ صَغَتْ قُلُوبُكُمَا) إحداهما عائشة رضي الله عنها فمن الأخرى؟", answer: "حفصة بنت عمر" },
+{ question: "من القائل: الأم مدرسة إذا أعددتها أعددت شعباً طيب الأعراق؟", answer: "حافظ إبراهيم" },
+{ question: "يطلق على المطبوعة التي تصدر كل عام؟", answer: "حولية" },
+{ question: "مؤلف كتاب (السلوك الاجتماعي في الإسلام)؟", answer: "حسن أيوب" },
+{ question: "يطلق على صغير الضب؟", answer: "الحسل" },
+{ question: "يطلق على حركة المقاومة الإسلامية في فلسطين؟", answer: "حماس" },
+{ question: "من أقسام الكلمة؟", answer: "الحرف" },
+{ question: "مدينة سورية يوجد فيها قبر الصحابي الجليل خالد بن الوليد؟", answer: "حمص" },
+{ question: "زوج حليمة السعدية مرضعة رسول الله- صلى الله عليه وسلم -؟", answer: "الحارث بن عبد العزى" },
+{ question: "صحابي جليل مات يوم بئر معونة لما طعن من ورائه بحربة قال بعد أن أصيب: (فزت ورب الكعبة)؟", answer: "حرام بن ملحان" },
+{ question: "المكان الذي كانت تسكنه إرم ذات العماد؟", answer: "حضرموت" },
+{ question: "لقب لقب به الخليفة الأموي مروان بن محمد؟", answer: "الحمار" },
+{ question: "لقب أطلق على الصحابي الجليل عبد الله بن الزبير؟", answer: "حمامة المسجد" },
+{ question: "مؤسس جماعة الإخوان المسلمين؟", answer: "حسن البنا" },
+{ question: "يطلق على شدة الندم على ما فات؟", answer: "الحسرة" },
+{ question: "أضخم الحيوانات اللافقرية؟", answer: "الحبار" },
+{ question: "شاعر جاهلي من أصحاب المعلقات اشتهر بمدافعته عن قبيلته أمام عمرو بن هند ملك الحيرة؟", answer: "الحارث بن حلزة" },
+{ question: "الذي بنى الكعبة المشرفة بناءها الحالي؟", answer: "الحجاج بن يوسف" },
+            ],
+            'خ': [
+                { question: "من هو مؤسس علم الجبر؟", answer: "الخَوارِزمي " },
+                { question: "ماذا يسمى طعام الولادة؟", answer: "الخرس" },
+{ question: "الاسم القديم لمرض الدفتيريا عند العرب؟", answer: "خانوق" },
+{ question: "من أين تحصل الأسماك في البحار على الأوكسجين؟", answer: "الخياشيم" },
+{ question: "هو بقايا ما تهدم من المساكن وغيرها وضد العمران؟", answer: "الخراب" },
+{ question: "هي وسيلة لتمثيل سطح الأرض أو جزء منه على لوحة مستوية؟", answer: "الخريطة" },
+{ question: "ما هو صوت النمر؟", answer: "خرخرة" },
+{ question: "ما هو اللفظ العربي للمادة الكيميائية الزنك؟", answer: "خارصين" },
+{ question: "هو شجر هندي سريع النمو لين القضبان أملس العيدان تصنع منه الكراسي؟", answer: "الخيزران" },
+{ question: "هو ما يتعمد من الفعل وضده الصواب؟", answer: "الخطاء" },
+{ question: "من القائل: (فلا نامت أعين الجبناء)؟", answer: "خالد بن الوليد" },
+{ question: "كم يبلغ عدد عيون النحلة؟", answer: "خمس عيون" },
+{ question: "هو مرادف للخوف؟", answer: "الخشية" },
+{ question: "اصطلاح نحوي يطلق على ما يسند إلى المبتدأ؟", answer: "الخبر" },
+{ question: "يطلق على عصير العنب أو التمر أو الشعير وشاربه لا يميز ولا يعقل؟", answer: "الخمر" },
+{ question: "هو خط عرض تتعامد عليه أشعة الشمس مرتين في السنة.. فما هو؟", answer: "خط الاستواء" },
+{ question: "هو قطعة من البحر تدخل في البر؟", answer: "الخليج" },
+{ question: "ما الاسم الذي يطلق على المشرق والمغرب؟", answer: "الخافقان" },
+{ question: "نبات مخدر يصنع منه الأفيون؟", answer: "الخشخاش" },
+{ question: "هو كل ما تغطي به المرأة رأسها؟", answer: "الخمار" },
+{ question: "هي زبدة الشيء أو ما يستخرج من المادة حاويا لخصائصها؟", answer: "الخلاصة" },
+{ question: "مدينة بالمملكة العربية السعودية بالقرب من الدمام؟", answer: "الخبر" },
+{ question: "من الصحابيات التي فقدت أبناءها وزوجها وصبرت؟", answer: "الخنساء" },
+{ question: "من الغازات الكيميائية السامة تستعمل عادة في الحروب وهي محرمة دوليا؟", answer: "الخردل" },
+{ question: "هو اسم قدم البعير؟", answer: "خف" },
+{ question: "قال تعالى: (وإذ تخلق من الطين كهيئة الطير).. ما هو هذا الطير؟", answer: "الخفاش" },
+{ question: "لا تعتمد الأوراق الرسمية في المعاملات الحكومية إلا به؟", answer: "الختم" },
+{ question: "حلقة من شعر تجعل في أنف البعير بعد ثقبها يشد بها الزمام؟", answer: "خزيمة" },
+{ question: "ماذا يقصد بمصطلح (الفوبيا) في علم النفس؟", answer: "الخوف" },
+{ question: "هو نبات يكثر قرب المياه ومن ثمره يستخرج مسهل بزيت معروف؟", answer: "الخروع" },
+{ question: "نوع من أنواع الحلي يوضع في قدم المرأة للزينة؟", answer: "خلخال" },
+
+            ],
+            'د': [
+            { question: "في اللغة بمعنى المكر ؟", answer: "الدهاء" },
+{ question: "هو من يرسل سرا ليلا ليأتي بالأخبار ؟", answer: "دسيس" },
+{ question: "من مدن جمهورية مصر العربية ؟", answer: "دمياط" },
+{ question: "الليلة الثلاثون من كل شهر قمري سميت بذلك لشدة ظلمتها ؟", answer: "الدلماء" },
+{ question: "ما اسم أول وحدة عملة في تاريخ الإسلام ؟", answer: "الدينار" },
+{ question: "ما هي عاصمة دولة تنزانيا ؟", answer: "دار السلام" },
+{ question: "هو سواد الليل و ظلمته ؟", answer: "الدجى" },
+{ question: "هو المرض و العلة ؟", answer: "الداء" },
+{ question: "يغفر للشهيد كل شيء إلا شيء واحد ؟", answer: "الدين" },
+{ question: "هو صغير الدب ؟", answer: "ديسم" },
+{ question: "هو مرض يصيب أنملة الإصبع فتورم و تتقيح و تكون ألما شديدا ؟", answer: "الداحوس" },
+{ question: "أقصى قعر الشيء و هو ما يقابل الدرج بمعنى الصعود ؟", answer: "الدرك" },
+{ question: "وضع الميت تحت التراب و مواراة بدنه ؟", answer: "الدفن" },
+{ question: "هي الجرة ذات العروة ؟", answer: "دورق" },
+{ question: "هي الشجرة العظيمة المتشبعة ذات الفروع العديدة ؟", answer: "الدوحة" },
+{ question: "طبقات الجنة درجات و طبقات النار ...", answer: "دركات" },
+{ question: "يضخها القلب إلى جميع أجزاء جسم الإنسان ؟", answer: "الدماء" },
+{ question: "ما هو الذي نأكله قبل أن يولد و نأكله بعد أن يموت ؟", answer: "الدجاج" },
+{ question: "بمعنى حسن الخلق و راقي الصفات ؟", answer: "دماثة" },
+{ question: "هو الزمان الطويل أو مدة الحياة كلها ؟", answer: "الدهر" },
+{ question: "هو المخادع أو المحتال في أقواله و أفعاله ؟", answer: "دجال" },
+{ question: "كوكب المريخ له قمران يدوران حوله إحداهما اسمه فوبوس فما هو اسم الآخر ؟", answer: "دايموس" },
+{ question: "ما هو الطائر الذي يكنى بأبي اليقظات ؟", answer: "الديك" },
+{ question: "يطلق على المتصوفة و اتباع الطرق الصوفية ؟", answer: "دراويش" },
+{ question: "هي قول يطلب به الإنسان إثبات حق على الغير في المحاكم ؟", answer: "الدعوى" },
+{ question: "هي السحابة كثيرة المطر ؟", answer: "داجنة" },
+{ question: "هو صوت النمل ؟", answer: "دبيب" },
+{ question: "يطلق على الأسد القوي الشجاع ؟", answer: "در غام" },
+{ question: "هو اسم المفاعل النووي الذي يملكه اليهود في إسرائيل ؟", answer: "ديمونا" },
+{ question: "ماء لم يخرج من الأرض و لم ينزل من السماء ؟", answer: "الدموع" },
+
+],
+            'ذ': [
+                { question: "من هو الملك الصالح الذي ملك الأرض و ورد ذكره في سورة الكهف؟", answer: "ذو القرنين" },
+                { question: "ما هي القدرة على التفكير وإصدار الأحكام؟", answer: "ذكاء" },
+                { question: "نوع من أنواع السمك ؟", answer: "ذئب البحر" },
+{ question: "بمعنى السهو و سرحان العقل ؟", answer: "الذهول" },
+{ question: "حشرة ذكرت في القرآن الكريم ؟", answer: "الذباب" },
+{ question: "الانكسار و الخضوع و الهوان ؟", answer: "ذل" },
+{ question: "هو القبيح من كل شيء ؟", answer: "ذميم" },
+{ question: "اللسان إذا انسلق و انقشر من داء يصيبه ؟", answer: "ذحق" },
+{ question: "بمعنى غلبه و سبقه ؟", answer: "ذرعه" },
+{ question: "هو من أنواع الجمال الروحي و الخلق الرفيع ؟", answer: "الذوق" },
+{ question: "يوصف به نزول الدمع من العين ؟", answer: "ذرف" },
+{ question: "هو تسخير الشيء و تسهيله و تمهيده ؟", answer: "ذلل" },
+{ question: "ضمير الجمع ( هم ) باللغات الإنجليزية ؟", answer: "ذم" },
+{ question: "ما خبئ لوقت الحاجة ؟", answer: "ذخر" },
+{ question: "في اللغة بمعنى الخوف و الفزع ؟", answer: "ذعر" },
+{ question: "صفة تدل على الفطنة و الحفظ معا ؟", answer: "الذهن" },
+{ question: "ما ميقات أهل العراق ؟", answer: "ذات عرق" },
+{ question: "خاصية يتميز بها محلول السكر ؟", answer: "الذوبان السريع" },
+{ question: "هي الموجات الترددية في الجو ؟", answer: "ذبذبات" },
+{ question: "هو أحد الأمراض التي كان العرب يعرفونها قديما ؟", answer: "ذات الجنب" },
+{ question: "الذبح أو النحر بشروطه الشرعية ؟", answer: "ذكاه" },
+{ question: "هو نوع من أنواع الذباب الهندي ؟", answer: "الذراح" },
+{ question: "هو فصاحة اللسان و قوة عربيته ؟", answer: "ذلاقة اللسان" },
+{ question: "توجب غضب الرب و تمنع الرزق ؟", answer: "الذنوب" },
+{ question: "كلمة تعني نشر الخبر و أعلنه ؟", answer: "ذاعه" },
+{ question: "نبات عشبي يصنع منه الخبز و يدخل في صناعة النشا ؟", answer: "الذرة" },
+{ question: "الأحداث التي تحدث في الوقت الحالي تمثل في المستقبل ...", answer: "ذكريات" },
+{ question: "هي المرأة السليطة اللسان ؟", answer: "ذربة" },
+{ question: "الذباب مشتق من ( ذب آب ) فما معناها ؟", answer: "ذهب و عاد" },
+{ question: "معركة قادها خالد بن الوليد ضد الفرس و انتصر فيها ؟", answer: "ذات السلاسل" },
+{ question: "من هو الملك الصالح الذي ملك الأرض و ورد ذكره في القرآن ؟", answer: "ذو القرنين" },
+{ question: "لقب نبي الله إسماعيل عليه السلام ؟", answer: "الذبيح" },
+            ],
+            'ر': [
+            { question: "ما مساحة الربع الخالي ؟", answer: "ربع مليون كم2" },
+{ question: "هو إصلاح الثوب و وصل قطعتيه المنفصلتين ؟", answer: "رتق" },
+{ question: "الذاكرة العشوائية في الحاسب الآلي ؟", answer: "رام" },
+{ question: "عملة ماليزيا ؟", answer: "رينقت" },
+{ question: "نوع من أنواع الأشعة الحديثة لتصوير الدماغ بالألوان ؟", answer: "الرنين المغناطيسي" },
+{ question: "عنصر فلزي إشعاعي ؟", answer: "الراديوم" },
+{ question: "شخص يحتجز لضمان اتفاق ما ؟", answer: "رهينة" },
+{ question: "هو نزف الأنف دما ؟", answer: "رعاف" },
+{ question: "هو الرمي بالحجارة حتى الموت ؟", answer: "الرجم" },
+{ question: "هي باطن كف اليد في اللغة ؟", answer: "راحة" },
+{ question: "هو الباب العظيم الحجم العظيم القفل ؟", answer: "رتاج" },
+{ question: "وحدة وزن إنجليزية ؟", answer: "رطل" },
+{ question: "أحد أصناف أسنان الفم في الإنسان ؟", answer: "الرحى" },
+{ question: "الاسم الفارسي لدفتر تقويم السنوات و الشهور و الأيام ؟", answer: "روزنافه" },
+{ question: "ما هو الشيء الذي يتكلم بكل لغات العالم في نفس الوقت ؟", answer: "الراديو" },
+{ question: "جهاز يستخدم الموجات اللاسلكية ذات التردد فوق العالي لاكتشاف الأشياء الغير منظورة ؟", answer: "الرادار" },
+{ question: "من هو أول طبيب مسلم فصل بين طب الأطفال و طب النساء ؟", answer: "الرازي" },
+{ question: "هو المادة الأساسية في صناعة الزجاج ؟", answer: "الرمل" },
+{ question: "اسم يطلق على الطفل إلى أن يبلغ السنتين ؟", answer: "رضيع" },
+{ question: "وحدة لقياس قوة الزلازل التي تحدث ؟", answer: "ريختر" },
+{ question: "إحدى مفاصل الأصابع ؟", answer: "الراجية" },
+{ question: "نوع من الألعاب عبارة عن إصابة الهدف و الرمي بالبندقية على أهداف ثابتة أو متحركة ؟", answer: "الرماية" },
+{ question: "هي النفخة الأولى في الصور يوم القيامة ؟", answer: "الراجفة" },
+{ question: "الباب الذي يدخل منه الصائمون يوم القيامة ؟", answer: "الريان" },
+{ question: "محلول السكر الذي يفرز في الأزهار و يمتصه النحل ليصنع منه العسل ؟", answer: "رحيق" },
+{ question: "هي فرقة من الشيعة تجيز الطعن و السب في كبار الصحابة ؟", answer: "الرافضة" },
+{ question: "مرض يتميز بآلام في العضلات و المفاصل و يداوى بواسطة المياه المعدنية الحارة ؟", answer: "الروماتيزم" },
+{ question: "داخل كل إنسان تعيش معه فإذا جاء الموت خرجت و لم تعد ؟", answer: "الروح" },
+{ question: "ما هو الشرك الأصغر ؟", answer: "الرياء" },
+{ question: "من أمراض العين ؟", answer: "رمد" },
+            ],
+            'ز': [
+                { question: "طعام أهل النار؟", answer: "الزقوم" },
+                { question: "من الصحابي الذي أمره الرسول عليه السلام بتعلم لغة اليهود فتعلمها في 15 يوماً؟", answer: "زيد بن ثابت   " },
+                { question: "هو اهتزاز الأرض و ارتجافها ؟", answer: "زلزال" },
+{ question: "ما معنى كلمة بترول ؟", answer: "زيت الصخر" },
+{ question: "ما اسم امرأة عزيز مصر التي راودت يوسف عليه السلام عن نفسه ؟", answer: "زليخة" },
+{ question: "طعام أهل النار ؟", answer: "الزقوم" },
+{ question: "من الكتب السماوية ؟", answer: "الزبور" },
+{ question: "هو ما بين مفصل الكوع و الكتف في جسم الإنسان ؟", answer: "زند" },
+{ question: "نوع من أنواع النباتات يستعمله الإنسان كشراب بعد غليه ؟", answer: "زنجبيل" },
+{ question: "هو اللقب الذي أطلق على سيدة نساء أهل الجنة ؟", answer: "الزهراء" },
+{ question: "هي شجرة لها زهر أبيض طيب الرائحة ؟", answer: "الزيزفون" },
+{ question: "يابس و صافي كالماء ولد في النار و إذا عاد إليها انهار ؟", answer: "الزجاج" },
+{ question: "هي السلسلة الحديدية المسننة تدخل في بعض الصناعات ؟", answer: "زنجير" },
+{ question: "هي قطعة من الحديد حلزونية الالتواء تتمتع بخاصية التمدد و المرونة و تستعمل في بعض الصناعات ؟", answer: "الزنبرك" },
+{ question: "ما هي عاصمة دولة زينجبار في أفريقيا ؟", answer: "زينجبار" },
+{ question: "من القبائل المشهورة في أفريقيا يتميزون بشدتهم في الحرب ؟", answer: "الزولو" },
+{ question: "يطلق على فرخ الحمام و أحد أنواع البلح الأحمر ؟", answer: "زغلول" },
+{ question: "الملائكة المكلفة بدفع أهل النار إليها ؟", answer: "الزبانية" },
+{ question: "ما أكبر مدينة من حيث عدد السكان في سويسرا ؟", answer: "زيورخ" },
+{ question: "من أنواع الخشب و أجودها يصنع منه الأثاث ؟", answer: "الزان" },
+{ question: "حجر كريم يشبه الزمرد و له ألوان كثيرة ؟", answer: "زبرجد" },
+{ question: "هو تحريك الشيء بشدة و قوة ؟", answer: "زعزعة" },
+{ question: "يطلق على الوقت قليلا كان أم كثير ؟", answer: "الزمن" },
+{ question: "هو الكفر باطنا مع التظاهر بالإيمان ؟", answer: "زندقة" },
+{ question: "هو مادة فلزية بيضاء تميل إلى الزرقة تستخرج من الأرض و تدخل في صناعات مختلفة مستقلة بنفسها أو مسبوكة مع غيرها ؟", answer: "الزنك" },
+{ question: "مادة سوداء مستمدة من المواد القطرانية تذيبها الحرارة و تستخدم في رصف الطرق ؟", answer: "زفت" },
+{ question: "من أول من سل سيفا في الإسلام ؟", answer: "الزبير بن العوام" },
+{ question: "مرض تآكل خلايا المخ مع تقدم العمر فيصاب الإنسان بالخرف ؟", answer: "الزهايمر" },
+{ question: "هو علم الحيوان ؟", answer: "زولوجيا" },
+{ question: "هو الاسم القديم لجمهورية الكونغو في إفريقيا ؟", answer: "زائير" },
+{ question: "من فرق الشيعة و هم اقرب الفرق للسنة ؟", answer: "الزيدية" },
+{ question: "هو حجر كريم شفاف شديد الخضرة و أشده خضرة أجوده و أصفاه جوهرا ؟", answer: "الزمرد" },
+            ],
+            'س': [
+                { question: "من هو القائد الإسلامي الذي انتصر على التتار والمغول وهزم هولاكو؟", answer: "القائد سيف الدين قطز" },
+                { question: "ما هو الاسم الذي يُطلق على مربي الخيل و مروضه؟", answer: " سائس   " },
+                { question: "ما عاصمة البوسنة والهرسك ؟", answer: "سراييفو" },
+{ question: "حيوان لبون لونه أزرق رمادي له ذنب طويل كثيف الشعر يتخذ من جلده فراء حسنة ثمينة ؟", answer: "سنجاب" },
+{ question: "هو القطيع أو الجماعة جنب إلى جنب ؟", answer: "سرب" },
+{ question: "ماذا يسمى شحم سنام الإبل ؟", answer: "السر هد" },
+{ question: "كم عدد أحزاب القرآن ؟", answer: "ستون حزبا" },
+{ question: "من قائد معركة القادسية ؟", answer: "سعد بن أبي وقاص" },
+{ question: "ما أكبر مدينة من حيث عدد السكان في استراليا ؟", answer: "سيدني" },
+{ question: "هو اللباس في النار و جاء وصفه في القرآن ؟", answer: "سرابيل" },
+{ question: "أحد فصائل القرود ؟", answer: "السعدان" },
+{ question: "كم عدد السور التي افتتحت بـ ( طسم ) ؟", answer: "سورتان" },
+{ question: "ما عاصمة كشمير ؟", answer: "سري نجار" },
+{ question: "كم كان عمر نبينا محمد صلى الله عليه وسلم عندما ماتت أمه ؟", answer: "ست سنوات" },
+{ question: "هو مربي الخيل و مروضه ؟", answer: "سائس" },
+{ question: "شجرة ذكرت في القرآن ؟", answer: "السدر" },
+{ question: "ترك التكلم مع القدرة عليه ؟", answer: "السكوت" },
+{ question: "وقت في الليل يستحب الاستغفار فيه ؟", answer: "السحر" },
+{ question: "من أول من كتب بسم الله الرحمن الرحيم ؟", answer: "سليمان عليهالسلام" },
+{ question: "المسافة التي يقطعها جسم متحرك في وحدة من الزمن ؟", answer: "السرعة" },
+{ question: "اسم عين في الجنة ؟", answer: "سلسبيل" },
+{ question: "هي وجه بلا لسان و تتحدث عن الزمان ؟", answer: "الساعة" },
+{ question: "تبكي بلا عيون و تمشي بلا أرجل فما هي ؟", answer: "السحابة" },
+{ question: "بمعنى حفيد أو قريب أو صاحب نسل ؟", answer: "سبط" },
+{ question: "الممثل الدبلوماسي لدولة ما في دولة مضيفة ؟", answer: "سفير" },
+{ question: "من أسماء جهنم ؟", answer: "سقر" },
+{ question: "من الثدييات المتوحشة الآكلة للحوم و ذكرت في القرآن ؟", answer: "السبع" },
+{ question: "كل قطعة مستطيلة من المعدن مصبوبة كالقضبان و تكون من الذهب أو الفضة ؟", answer: "سبيكة" },
+{ question: "أحد الفلاسفة اليونانيين ؟", answer: "سقراط" },
+{ question: "هو مرض يظهر عن طريق تكاثر الخلايا في جسم الإنسان بطريقة جنونية حتى الوفاة ؟", answer: "السرطان" },
+{ question: "من مؤلف كتاب تاريخ الخلفاء ؟", answer: "السيوطي" },
+{ question: "عالم نحوي مسلم ذو أصل فارسي يعد من أوسع النحاة شهرة ؟", answer: "سيبويه" },
+            ],
+            'ش': [
+                { question: "بيت لا يتواجد به أبواب أو شبابيك مطلقًا؟", answer: "الشعر " },
+                { question: "ما اسم السبت قبل الإسلام ؟", answer: "شبار" },
+{ question: "سورة تسمى الجامعة ؟", answer: "الشعراء" },
+{ question: "ما هو لقب القائد الإسلامي المجاهد عمر بن الخطاب ؟", answer: "شيخ المجاهدين" },
+{ question: "ما يستعمل لتثبيت الشموع فيه للزينة ؟", answer: "شمعدان" },
+{ question: "النوع الخفيف من الضباب ؟", answer: "شبورة" },
+{ question: "في الفيزياء : حزمة دقيقة من الضوء تنطلق باستقامة واحدة من مصدر الضوء ؟", answer: "الشعاع" },
+{ question: "ما يستعمله الصياد لصيد السمك بسنارته ؟", answer: "شص" },
+{ question: "هو خفة اليد و أعمال كالسحر في الشيء للعين بغير ما هو عليه ؟", answer: "شعوذة" },
+{ question: "هو العرق النابض الذي يحمل الدم من القلب إلى الجسد ؟", answer: "الشريان" },
+{ question: "القطع الصغيرة المتطايرة من قنبلة ما ؟", answer: "شظايا" },
+{ question: "يطلق على البخيل الحريص على المال ؟", answer: "الشحيح" },
+{ question: "إلى أين كانت رحلة الصيف لقريش ؟", answer: "الشام" },
+{ question: "هو الطريد الذي لا مأوى له ؟", answer: "الشريد" },
+{ question: "العلامة التي تميز دولة أو جماعة من قول أو نقش أو غيرهما ؟", answer: "الشعار" },
+{ question: "مذهب فكري يقوم على الإلحاد و أن المادة هي أساس كل شيء و تنكر وجود الله ؟", answer: "الشيوعية" },
+{ question: "القائد الفرنسي الذي هزم المسلمون في معركة بلاط الشهداء ؟", answer: "شارل ما رتل" },
+{ question: "نهر يتكون من التقاء نهري دجلة و الفرات يصب في الخليج العربي ؟", answer: "شط العرب" },
+{ question: "هو الخصام و القطيعة بين فرد أو جماعة أخرى ؟", answer: "شقاق" },
+{ question: "امرأة حكمت مصر 80 يوما بعد وفاة زوجها ؟", answer: "شجرة الدر" },
+{ question: "بمعنى قطع الزوائد و قلمها ؟", answer: "شذب" },
+{ question: "هي إحدى مراحل تطور الدودة في خلقتها ؟", answer: "شرنقة" },
+{ question: "أحد الأئمة الأعلام و صاحب مذهب فقهي ؟", answer: "الشافعي" },
+{ question: "هو نوع من الأغطية كانت العرب تستعمله في لباسها ؟", answer: "شملة" },
+{ question: "هو جدول الماء المتساقط من مستوى مرتفع إلى مستوى منخفض ؟", answer: "شلال" },
+{ question: "كتلة من الغازات الملتهبة و مصدر للحرارة التي تحتاج إليها الكائنات الحية ؟", answer: "الشمس" },
+{ question: "هو ما يتطاير من النار أو الضوء الحادث من التفريغ الكهربائي ؟", answer: "شرارة" },
+{ question: "هو مجاوزة الحد و البعد عن الحق ؟", answer: "شطط" },
+{ question: "من هو العدو الأول لبني الإنسان ؟", answer: "الشيطان" },
+{ question: "طائر من الجوارح من فصيلة الصقور ؟", answer: "شاهين" },
+{ question: "عملة اليهود في أرض فلسطين ؟", answer: "شيكل" },
+            ],
+            'ص': [
+                { question: "ما أكثر الدول سكانا في العالم؟", answer: "الصين" },
+                 { question: "ما أقدم دولة تنتج البخور و اللبان في العالم؟", answer: "الصومال" },
+                 { question: "ما هو الاسم السري لقنبلة هيروشيما؟", answer: "الصبي الصغير" },
+                 { question: "هو لفظ يعبر عن التحسين لمادة صلبة و إخراجها بشكل أفضل؟", answer: "صقل" },
+                 { question: "ما هو العذاب الذي وقع على قوم ثمود؟", answer: "الصيحة" },
+                 { question: "هو نوع من أنواع الأخشاب غالية الثمن؟", answer: "الصندل" },
+                 { question: "يستخرج من الشجر و يساهم في تطوير العديد من الصناعات؟", answer: "صمغ" },
+                 { question: "هي قمة ظهر الفرس؟", answer: "صهوة" },
+                 { question: "كانت العرب تستخدمه في حفظ المال في جيوبها؟", answer: "صرة" },
+                 { question: "إحدى أنواع الحمى تصيب الإنسان؟", answer: "الصفراوية" },
+                 { question: "هو عمود يقام في السفينة يشد عليه الشراع؟", answer: "الصاري" },
+                 { question: "سائل قلوي أصفر أو أخضر اللون يفرزه الكبد و يتجمع في المرارة؟", answer: "الصفراء" },
+                 { question: "يطلق على صوت السيوف في الحرب", answer: "صليل" },
+                 { question: "لفظة وردت في القرآن الكريم تعني منهاج الله و طريقته؟", answer: "صبغة" },
+                 { question: "هبوط فجائي في المراكز الحيوية للجهاز العصبي؟", answer: "الصدمة العصبية" },
+                 { question: "عاصمة بلغاريا تقع في واد قرب جبال البلقان؟", answer: "صوفيا" },
+                 { question: "ظاهرة اصطدام الصوت بحاجز ثم رجوعه مرة أخرى؟", answer: "الصدى" },
+                 { question: "مدينة توجد في الجزء الشرقي من وسط تونس على البحر المتوسط؟", answer: "صفا قس" },
+                 { question: "هو شدة الشوق و الهوى؟", answer: "صبابة" },
+                 { question: "صيحة تصم الآذان لشدتها يوم القيامة؟", answer: "الصاخة" },
+                 { question: "هم الذين يدخلون الجنة من باب الريان؟", answer: "الصائمون" },
+                 { question: "ما هي الخمس التي لا سادس لها؟", answer: "الصلوات" },
+                 { question: "الاسم الذي يطلق على معبد اليهود قديما؟", answer: "الصومعة" },
+                 { question: "من هم الذين وصفهم الله بعبدة الكواكب؟", answer: "الصائبة" },
+                 { question: "آلة ينفخ فيها إسرافيل يوم القيامة النفخة الأولى؟", answer: "الصور" },
+                 { question: "جزيرة في وسط البحر الأبيض المتوسط فتحها المسلمون؟", answer: "صقلية" },
+                 { question: "هو الجزء ما بين العين و الأذن؟", answer: "صدغ" },
+                 { question: "ماذا يطلق على صوت الفرس؟", answer: "صهيل" },
+                 { question: "هو وصف للملائكة ورد في القرآن الكريم؟", answer: "الصافات" },
+                 { question: "حجر كانت تستخدمه العرب قديما لإشعال النار؟", answer: "الصوان" }
+            ],
+            'ض': [
+                { question: "هو بخار الماء الكثيف و يغشى الأرض كالدخان؟", answer: "الضباب" },
+                 { question: "من أسماء الأسد مكون من أربعة حروف؟", answer: "ضيغم" },
+                 { question: "هو الشيء الذي يؤنب الإنسان على فعل خطاء في نفسه؟", answer: "الضمير" },
+                 { question: "المتمكن من الشيء المتعمق في عمله و الماهر به؟", answer: "ضليع" },
+                 { question: "نبات ذكره الله في القرآن الكريم في سورة الغاشية و هو طعام أهل النار؟", answer: "الضريع" },
+                 { question: "القوة المؤثرة التي تتركز على نقطة معينة بفعل الثقل الذي يحدثه عمود الهواء على هذه النقطة؟", answer: "الضغط الجوي" },
+                 { question: "صفة النصارى التي ذكرها القرآن الكريم في سورة الفاتحة؟", answer: "الضالين" },
+                 { question: "من أسماء الأسد مكون من خمسة حروف؟", answer: "ضرغام" },
+                 { question: "هي وظيفة القلب الأساسية في الجسم؟", answer: "ضخ الدم" },
+                 { question: "نستمده من أشعة الشمس على الأرض؟", answer: "الضوء" },
+                 { question: "من مراتب صحة الحديث؟", answer: "الضعيف" },
+                 { question: "هو تصحيح الكتاب و تدقيقه و تشكيله؟", answer: "ضبط" },
+                 { question: "من معجزات موسى عليه السلام لفرعون؟", answer: "الضفادع" },
+                 { question: "هي الحاجة أو الشدة التي لا مدفع لها؟", answer: "ضرورة" },
+                 { question: "ما هي السورة التي سميت باسم وقت من أوقات الزمن؟", answer: "الضحى" },
+                 { question: "هي شاطئ البحر و ساحله؟", answer: "الضفة" },
+                 { question: "الشعر الطويل المتشابك مع بعضه البعض مكونا الجدائل؟", answer: "ضفيرة" },
+                 { question: "هي عظم مستطيل من عظام الجنب منحني؟", answer: "الضلع" },
+                 { question: "هو ما تضرم به النار من الحطب؟", answer: "الضرام" },
+                 { question: "كلمة مرادفة للحقد؟", answer: "ضغينة" },
+                 { question: "هو الجلبة و الصياح؟", answer: "ضجيج" },
+                 { question: "العملية الأساسية في الحساب و الجبر؟", answer: "الضرب" },
+                 { question: "هو التزام الهدوء بعد التعرض لموقف يضيق به الصدر؟", answer: "ضبط النفس" }
+            ],
+            'ط': [
+                { question: "مدينة لبنانية و ميناء مهم تشتهر ببساتين الزيتون و فيها معمل لتكريري البترول ؟", answer: "طرابلس" },
+{ question: "بما كانت تدعى أم المؤمنين خديجة في الجاهلية ؟", answer: "الطاهرة" },
+{ question: "ما أكبر مدينة في آسيا ؟", answer: "طوكيو" },
+{ question: "هو العرق التركي الذي يتغنى به دعاة التعصب لقومية الشعوب ؟", answer: "الطورانية" },
+{ question: "من هو الصحابي المعروف بذي النور ؟", answer: "الطفيل بن عمر الدوسي" },
+{ question: "هو أول ملوك الدولة السلجوقية ؟", answer: "طغرلبك" },
+{ question: "ما معنى حجارة من سجيل ؟", answer: "طين متحجر" },
+{ question: "هي الصواريخ التي تطلقها الغواصات في البحار ؟", answer: "طوربيد" },
+{ question: "من هو أول تابعي فسر القرآن ؟", answer: "الطبري" },
+{ question: "الحالة التي تتكون فيها شخصية الإنسان مستقبلا و تدور حوله كثير من أسباب العقد النفسية ؟", answer: "الطفولة" },
+{ question: "من هو الشخص الذي لا يغضب إذا أخرجت له لسانك ؟", answer: "الطبيب" },
+{ question: "هو نظام اجتماعي يعتمد على الفصل بين أفراد المجتمع ؟", answer: "طبقية" },
+{ question: "يحملك إلى حيث تريد و هو واقف ؟", answer: "الطريق" },
+{ question: "الوصف الذي ورد في الحديث الشريف للقطط ؟", answer: "الطوافون" },
+{ question: "من الأمراض الخطيرة كان يسمى الموت الأسود ؟", answer: "الطاعون" },
+{ question: "البحيرة التي سيشربها يأجوج و مأجوج في آخر الزمان ؟", answer: "طبرية" },
+{ question: "قذيفة ذاتية الانطلاق معدة لنسف سفن العدو و غواصاته ؟", answer: "طربيد" },
+{ question: "هو ما يتعذر فهمه و فك رموزه ؟", answer: "طلاسم" },
+{ question: "جبل أقسم الله تعالى به في القرآن الكريم ؟", answer: "الطور" },
+{ question: "هي الخضرة التي تعلو الماء الراكد أو النهري ؟", answer: "طحلب" },
+{ question: "من أسماء يوم القيامة ؟", answer: "الطامة" },
+{ question: "هو الكائن الحي الذي يعيش على غيره ؟", answer: "طفيلي" },
+{ question: "مدينة أسبانية تاريخية حكمها المسلمون قرونا طويلة ؟", answer: "طليطلة" },
+{ question: "هي البثور الجلدية التي تنشأ بسبب بعض الأمراض ؟", answer: "طفح" },
+{ question: "هو وزن للأثقال يقدر بألف كيلو جرام ؟", answer: "طن" },
+{ question: "أول باب في كتب الفقه ؟", answer: "الطهارة" },
+{ question: "من الشعوب المسلمة يضع الرجال على وجوههم لثاما أسود أو أزرق طيلة الوقت ؟", answer: "الطوارق" },
+{ question: "المدينة التي رحل إليها النبي صلى الله عليه و سلم قبل المدينة ؟", answer: "الطائف" },
+{ question: "أين كلم الله سبحانه و تعالى نبي الله موسى عليه السلام ؟", answer: "طور سيناء" },
+{ question: "صوت النحل أو الذبابة عند طيرانها ؟", answer: "طنين" },
+                
+            ],
+            'ظ': [
+            { question: "هي الأشعة الخاصة بتصوير قنوات العمود الفقري لدى الإنسان؟", answer: "الظليلة" },
+{ question: "هو الشيء الذي إذا سرت سار معك و لا تسبقه؟", answer: "الظل" },
+{ question: "هو من تكلم بكلام لا يفهم؟", answer: "ظأظأه" },
+{ question: "نهى الله عنه و قال أن بعضه إثم؟", answer: "الظن" },
+{ question: "هو اسم من أسماء الثعبان؟", answer: "الظربغانه" },
+{ question: "الشعر يصف بعضه حول بعض؟", answer: "الظفائر" },
+{ question: "هو علم الميتورولوجي؟", answer: "الظواهر الجوية" },
+{ question: "سلطان مملوكي يعود إليه الفضل بعد الله في تصفية الجيوش الصليبية و صد غارات التتار؟", answer: "الظاهر بيبرس" },
+{ question: "هو ما يذكر على ذكر النعام؟", answer: "ظليم" },
+{ question: "ماذا تسمى المرأة التي ترضع غير ولدها؟", answer: "الظئر" },
+{ question: "هي الناقة السوداء أو التي تغلب عليها السمرة؟", answer: "الظمياء" },
+{ question: "كان للرسول صلى الله عليه و سلم فرس. ما اسم هذا الفرس؟", answer: "الظرب" },
+{ question: "هي إحدى المذاهب القديمة التي تقوم على الأخذ بظاهر النص فقط؟", answer: "الظاهرية" },
+{ question: "هي العين الرقيقة الجفن؟", answer: "ظمياء" },
+{ question: "بماذا وصف نبي الله يونس نفسه في بطن الحوت؟", answer: "الظالمين" },
+{ question: "يطلق على الهودج الذي تركبه المرأة على الجمل؟", answer: "الظعينة" },
+{ question: "هو الجلد الميت النابت من جسم الإنسان يتم التخلص منه دوريا؟", answer: "الظفر" },
+{ question: "في الرياضيات: عكس ظل الزاوية؟", answer: "ظل التمام" },
+{ question: "هو يوم العذاب الذي أصاب قوم شعيب؟", answer: "الظلة" },
+{ question: "هو الظفر المشقوق للبقرة و الشاة و الظبي و نحوها؟", answer: "ظلف" },
+{ question: "ما كان المشهور عن الحجاج بن يوسف الثقفي في زمانه؟", answer: "ظالم" },
+{ question: "أصوات أجواف الإبل من شدة العطش؟", answer: "الظبظاب" },
+{ question: "بمعنى فاز و نجح في تحصيله؟", answer: "ظفر" },
+{ question: "في النحو: اسم دل على زمان الحدث أو مكانه؟", answer: "ظرف" },
+{ question: "ماذا كان يطلق على بحر المحيط الأطلسي قديما؟", answer: "الظلمات" },
+{ question: "هو الغلبة و الفوز و القهر؟", answer: "الظفر" },
+{ question: "هو المعين و المساعد؟", answer: "ظهير" },
+{ question: "في اللغة: بمعنى دام و استمر؟", answer: "ظل" },
+{ question: "من مدن سلطنة عمان؟", answer: "ظفار" },
+{ question: "يدخل فيه المتحابون في الله يوم القيامة؟", answer: "ظل عرش الرحمن" },            ],
+            'ع': [
+                { question: "من هو الصحابي الذي لقب بترجمان القرآن؟", answer: "عبد الله بن عباس " },
+                { question: "ماذا يسمى صوت الذئب؟", answer: "عواء" },
+                { question: "من خامس الخلفاء الراشدين؟", answer: "عمر بن عبد العزيز" },
+{ question: "ماذا يسبب نقص فيتامين (أ)؟", answer: "العمى الليلي" },
+{ question: "من أول فدائي في الإسلام؟", answer: "علي بن أبي طالب" },
+{ question: "ماذا يسمى ذكر الضفدع؟", answer: "العلجوم" },
+{ question: "من قائد غزوة ذات السلاسل؟", answer: "عمرو بن العاص" },
+{ question: "اللقب الذي أطلق على القارة الأمريكية عندما اكتشفها كولومبوس؟", answer: "العالم الجديد" },
+{ question: "يوم مشهور من يصومه يكفر السنة الماضية نجى الله فيه نبي الله موسى عليه السلام؟", answer: "عاشوراء" },
+{ question: "تسمى التوراة عند النصارى العهد القديم فماذا يسمى الإنجيل؟", answer: "العهد الجديد" },
+{ question: "مادة صلبة لا طعم لها و لا ريح إلا إذا أحرقت أو سحقت ينبعث منها رائحة زكية؟", answer: "العنبر" },
+{ question: "هو الداء المزمن الذي لا علاج له؟", answer: "عضال" },
+{ question: "تقسيم البشرية على أساس باطل من بعض المعايير كلون البشرة و نوع الشعر و اللغة و العائلة و البلد؟", answer: "العنصرية" },
+{ question: "هو الاسم القديم الذي كانت تعرفه العرب لنظام الشرطة؟", answer: "العسس" },
+{ question: "يطلق على المرأة المتحببة إلى زوجها؟", answer: "عروب" },
+{ question: "أحد الاختراعات لتصحيح النظر؟", answer: "العدسات" },
+{ question: "لقب السيدة مريم عليها السلام؟", answer: "العذراء" },
+{ question: "هي قافلة الجمال التي تكون محملة بالبضائع و السلع؟", answer: "عير" },
+{ question: "هي الناقة التي مضى على حملها عشرة أشهر؟", answer: "العشراء" },
+{ question: "الحيوان الصنم الذي عبدته بني إسرائيل؟", answer: "العجل" },
+{ question: "من الحشرات التي ذكرت في القرآن؟", answer: "العنكبوت" },
+{ question: "من أحفاد نوح عليه السلام و إليه تنسب العرب؟", answer: "عدنان" },
+{ question: "ما هو صوت الذئب؟", answer: "عواء" },
+{ question: "المرأة التي لم تتزوج؟", answer: "عذراء" },
+{ question: "معركة كانت بين المسلمين و التتار بقيادة قطز و معاونه الظاهر بيبرس؟", answer: "عين جالوت" },
+{ question: "لغة اليهود؟", answer: "العبرية" },
+{ question: "إذا طال قصر فما هو؟", answer: "العمر" },
+{ question: "هي مادة قرن الفيل؟", answer: "العاج" },
+{ question: "ماذا يسمى طعام المولود في اليوم السابع؟", answer: "العقيقة" },
+{ question: "ما هو اسم أبو جهل؟", answer: "عمرو بن هشام" },
+{ question: "ما اسم العام الذي ولد فيه سيدنا محمد صلى الله عليه وسلم؟", answer: "عام الفيل" },
+{ question: "ما هو الاسم الذي يطلق على الخط الذي كتب به القرآن الكريم؟", answer: "العثماني" },
+            ],
+            'غ': [
+            { question: "أحد أسماء الأسد؟", answer: "الغضنفر" },
+{ question: "هو باب من أبواب الشعر طرقه الشعراء و تغنوا به و ملئوا به دواوينهم؟", answer: "الغزل" },
+{ question: "ماذا يسمى طعام الختان؟", answer: "الغديرة" },
+{ question: "في مصطلح الحديث ما رواه واحد؟", answer: "غريب" },
+{ question: "كائن خرافي ضخم اشتهر عند العرب في روايات ألف ليلة و ليلة؟", answer: "غول" },
+{ question: "من أول من صنع المجهر البسيط؟", answer: "غاليليو" },
+{ question: "الصبي الذي يقارب سن البلوغ؟", answer: "الغلام" },
+{ question: "هو الكلام غير المفهوم؟", answer: "غص غصة" },
+{ question: "الكرب و الحزن ماذا يسمى؟", answer: "الغم" },
+{ question: "يطلق على ذكر السلحفاة؟", answer: "غليم" },
+{ question: "هم العرب النصارى حلفاء الروم أيام العصر الجاهلي؟", answer: "الغساسنة" },
+{ question: "ماذا يطلق على صوت النائم؟", answer: "غطيط" },
+{ question: "واحد من فواسق الدواب؟", answer: "الغراب" },
+{ question: "يطلق على من يموت في البحر أو النهر؟", answer: "غريق" },
+{ question: "هي المرأة التي استغنت بمالها عن أية محسنات؟", answer: "غانية" },
+{ question: "اسم من أربعة حروف إذا حذفت منه حرف زال؟", answer: "غزال" },
+{ question: "هو ما به نماء الجسم و قوامه؟", answer: "غذاء" },
+{ question: "هو الليل إذا أقبلت ظلمته؟", answer: "غطش" },
+{ question: "لقب الصحابي الجليل حنظلة بن عامر رضي الله عنه؟", answer: "غسيل الملائكة" },
+{ question: "من أسماء يوم القيامة ورد في القرآن الكريم؟", answer: "الغاشية" },
+{ question: "هو بيت السيف؟", answer: "غمد" },
+{ question: "إفاضة الماء على البدن كله مع النية؟", answer: "الغسل" },
+{ question: "مجاوزة الأمر المحدود؟", answer: "الغلو" },
+{ question: "هو العقل الظالم و الجائر؟", answer: "الغاشم" },
+{ question: "من الطيور المائية الجميلة لونه أسود؟", answer: "الغرنوق" },
+{ question: "تلون السماء بعد غروب الشمس؟", answer: "الغسق" },
+{ question: "هو صوت الماء المتحرك في حلق الإنسان؟", answer: "الغرغرة" },
+{ question: "لفظ يقصد به الزمن الماضي شديد القدم؟", answer: "الغابر" },
+{ question: "هو السحاب الأبيض؟", answer: "الغمام" },
+{ question: "هو ما يكون سحيقا و عميقا؟", answer: "غائر" },            ],
+            'ف': [
+                { question: "شيء يمكنك ان تقوم به دون ان تبذل أي مجهود في حياتك؟", answer: "الفشل " },
+                { question: "بماذا يسمى الخوف في علم النفس؟", answer: "الفوبيا  " },
+                { question: "ما أكبر بحيرة نهرية في العالم ؟", answer: "فكتوريا" },
+{ question: "ما أسرع الحيوانات البرية ؟", answer: "الفهد الهندي" },
+{ question: "إلى ماذا يؤدي نقص الحديد في الجسم ؟", answer: "فقر الدم" },
+{ question: "أعلى درجات الجنة ؟", answer: "الفردوس" },
+{ question: "هو الفقر و قلة ذات اليد و الشح ؟", answer: "الفاقة" },
+{ question: "سورة في القرآن غير الفاتحة تبدأ بالحمد لله ؟", answer: "فاطر" },
+{ question: "أحد علماء الرياضيات الإغريق له نظريات لا زالت تدرس إلى اليوم ؟", answer: "فيثاغورس" },
+{ question: "حيوان برمائي تلد صغارها تحت الماء ؟", answer: "فرس النهر" },
+{ question: "مرض في باطن جسم الإنسان يصيب منطقة الصفاق يعالج في النهاية بعملية جراحية ؟", answer: "الفتاق" },
+{ question: "أطول عظمة في جسم الإنسان ؟", answer: "الفخذ" },
+{ question: "مادة استعملت كمرهم للجسم مشتقة من النفط ؟", answer: "فازلين" },
+{ question: "من هم أكثر أهل الجنة ؟", answer: "الفقراء" },
+{ question: "طريقة من طرق الموت أنباء الرسول صلى الله عليه و سلم بحدوثها بكثرة في آخر الزمان ؟", answer: "الفجأة" },
+{ question: "لونه أسود ولا ينتفع به إلا إذا كان لونه أحمر ؟", answer: "الفحم" },
+{ question: "هو علم الكلام و المنطق ؟", answer: "الفلسفة" },
+{ question: "ما الشيء الذي إذا وضع في الثلاجة لا يبرد ؟", answer: "الفلفل" },
+{ question: "هو شكل من أشكال المعالجة الطبية كانت تستعمل قديما يتم فيها سحب الدم من جسم الإنسان للشفاء من بعض الأمراض ؟", answer: "الفصد" },
+{ question: "أول من ابتدع الاحتفال بالمولد النبوي ؟", answer: "الفاطميون" },
+{ question: "حضارة اندثرت قبل آلاف السنين ؟", answer: "الفينيقية" },
+{ question: "نوع من أنواع الورد ذو رائحة نفاذة ؟", answer: "الفل" },
+{ question: "هو من الأحجار الكريمة بخلاف الفسيفساء ؟", answer: "الفيروز" },
+{ question: "هو صوت الأفعى من فمها ؟", answer: "فحيح" },
+{ question: "عيد من أعياد النصارى ؟", answer: "الفصح" },
+{ question: "بروز جزء من الأمعاء من فتحة جدار البطن ؟", answer: "الفتق" },
+{ question: "عاصمة النمسا ؟", answer: "فينا" },
+{ question: "وحدة قياس كهربائية وهي وحدة القوة الدافعة الكهربائية ؟", answer: "فولت" },
+{ question: "إحدى ولايات الولايات المتحدة الأمريكية ؟", answer: "فلوريدا" },
+{ question: "مجموعة جرثومية دقيقة جدا لا ترى إلا بالمجهر تسبب أمراضا كثيرة للإنسان و الحيوان و النبات ؟", answer: "الفيروسات" },
+{ question: "من الأنظمة الإملائية تستخدم في الكتابة ؟", answer: "الفاصلة" },
+{ question: "لغة إيرانية من الفصيلة الهندية الإيرانية للغات الهندية الأوروبية ؟", answer: "الفارسية" }
+            ],
+            'ق': [
+                { question: " ماهي وحدة الوزن التي يوزن بها الالماس و الأحجار الكريمة و تساوي خمسة جرامات؟", answer: "القيراط " },
+                { question: "هو من رهبان النصارى و أعيان كنيستهم؟", answer: " قسيس" },
+                { question: "من هو أول ولد آدم ؟", answer: "قابيل" },
+{ question: "ما هو أول ما خلق الله ؟", answer: "القلم" },
+{ question: "من قائد معركة عين جالوت ؟", answer: "قطز" },
+{ question: "ما وحدة الوزن التي يوزن بها الماس و الأحجار الكريمة و تساوي خمسة جرامات ؟", answer: "القيراط" },
+{ question: "ماذا يسمى طعام الضيوف ؟", answer: "القرى" },
+{ question: "ما أكبر مدينة في أفريقيا ؟", answer: "القاهرة" },
+{ question: "هو الطوب الأحمر يستخدم في البناء ؟", answer: "القرميد" },
+{ question: "هي الفراسة في تتبع الأثر و معرفة مسارات الركبان ؟", answer: "القيافة" },
+{ question: "له خمسة أصابع بلا لحم و لا عظم ؟", answer: "القفاز" },
+{ question: "المسمى الذي يطلق على غرفة القيادة في السفينة ؟", answer: "قمره" },
+{ question: "ما أول منازل الآخرة ؟", answer: "القبر" },
+{ question: "نوع من أنواع الطعام طلبه اليهود من موسى عليه السلام ؟", answer: "قثاء" },
+{ question: "وجه بلا لسان و يدل على الزمان ؟", answer: "القمر" },
+{ question: "جبل في مكة اشتهر في عهد قريش ؟", answer: "قبيس" },
+{ question: "شيء كعبه للحيوان و رأسه للإنسان ؟", answer: "القمح" },
+{ question: "ما هو الوصف الذي وصف به الرسول صلى الله عليه و سلم به النساء ؟", answer: "القوارير" },
+{ question: "في أي مكان يكون فيه الخريف قبل الصيف و الخادم قبل السيد ؟", answer: "القاموس" },
+{ question: "الاسم الذي يطلق على مولدة النساء ؟", answer: "قابلة" },
+{ question: "هم قوم ينكرون القدر و يقولون أن كل إنسان خالق لفعله بإرادته ؟", answer: "القدرية" },
+{ question: "فئة اشتهرت في القرون الوسطى الميلادية بغزو السفن البحرية و السطو عليها ؟", answer: "القراصنة" },
+{ question: "ما أحدثه الصوفية على المساجد بجوار المآذن ؟", answer: "قباب" },
+{ question: "هو من رهبان النصارى و أعيان كنيستهم ؟", answer: "قسيس" },
+{ question: "من أنواع الطائرات الحربية تقوم بإسقاط القنابل و الصواريخ على مواقع العدو ؟", answer: "قاذفة" },
+{ question: "بمعنى تتبع أثره و لحقه ؟", answer: "قصه" },
+{ question: "من أصحاب القرآت السبع ؟", answer: "قالون" },
+{ question: "من الحشرات تصيب فروة الرأس أو شعر الحيوانات ؟", answer: "القراد" },
+{ question: "ما اسم ناقة النبي صلى الله عليه و سلم ؟", answer: "القصواء" },
+{ question: "مسمى يطلق على أدوات الكتابة من ورق و أقلام و مساطر و نحوه ؟", answer: "قرطاسية" },
+{ question: "معلم من معالم المسجد الأقصى ؟", answer: "قبة الصخرة" },
+{ question: "أول مسجد في الإسلام ؟", answer: "قباء" }
+            ],
+            'ك': [
+            { question: "هي ولاية تقع في منطقة جنوب الولايات المتحدة؟", answer: "كنتاكي " },
+                { question: "ما هي مادة ملح الطعام الكيمائية؟", answer: "كلوريد الصوديوم" },
+                { question: "ما هي ثاني اكبر دولة في العالم من حيث المساحة؟", answer: "كندا " },
+                { question: "ما هو أقدم خط للغة العربية؟", answer: "الكوفي" },
+                { question: "ما هو أكبر عضو في الجسم ؟", answer: "الكبد" },
+{ question: "من داعية الشيوعية ؟", answer: "كارل ماركس" },
+{ question: "وحدة من وحدات النقود الذهبية عند العرب و قد جاء ذكرها في سورة آل عمران فما اسمها ؟", answer: "كله" },
+{ question: "ما السؤال الذي تختلف إجابته دائما ؟", answer: "كم الساعة" },
+{ question: "ما أكبر مدينة في الهند من حيث السكان ؟", answer: "كلكتا" },
+{ question: "ما اسم ابن نوح الذي غرق في الطوفان ؟", answer: "كنعان" },
+{ question: "هو الأدب القديم أو أدب التراث ؟", answer: "كلاسيكي" },
+{ question: "زيت طيار صلب في درجات الحرارة العادية أبيض شفاف متبلور ذو رائحة ؟", answer: "كافور" },
+{ question: "ما هي عملة جمهورية التشيك ؟", answer: "كورون" },
+{ question: "حيوان فيه منفعة مباحة للحاجة و لا يصح بيعه ؟", answer: "الكلب" },
+{ question: "ما هو علم الجريمة و دوافعها ؟", answer: "الكرومونولوجي" },
+{ question: "ما هو الذي خلقه الله تعالى و استعظمه ؟", answer: "كيد النساء" },
+{ question: "ما هي مادة ملح الطعام الكيمائية ؟", answer: "كلوريد الصوديوم" },
+{ question: "له أربع أرجل و لا يستطيع المشي إلا محمولا ؟", answer: "الكرسي" },
+{ question: "هو مبنى البرلمان الروسي ؟", answer: "الكر ملين" },
+{ question: "من المواد البترولية أقل كثافة من السولار و قابل للاشتعال ؟", answer: "الكيروسين" },
+{ question: "رابطة الشعوب المستقلة من الاستعمار البريطاني ؟", answer: "الكومن ولث" },
+{ question: "تجويف طبيعي سطحي أو جوفي في صخرة أو جبل بعضها داخلي و بعضها سطحي ؟", answer: "الكهف" },
+{ question: "المجلس التشريعي الذي تصدر منه القرارات في الولايات المتحدة الأمريكية ؟", answer: "الكونغرس" },
+{ question: "ملك دعا عليه رسول الله صلى الله عليه و سلم عندما تلقى كتاب النبي و مزقه و قال : ( اللهم مزق ملكه ) ؟", answer: "كسرى" },
+{ question: "وكالة الأنباء الكويتية ؟", answer: "كونا" },
+{ question: "ما هو الاسم الكيميائي للطباشير المستخدمة في الكتابة ؟", answer: "كربونات الكالسيوم" },
+{ question: "هو أصل القائد صلاح الدين الأيوبي ؟", answer: "كردي" },
+{ question: "صفة أخرجت إبليس من الجنة ؟", answer: "الكبر" },
+{ question: "أتاوى هي عاصمة لإحدى الدول المتقدة فما هي هذه الدولة ؟", answer: "كندا" },
+{ question: "هي مقاطعة تتنازع عليها الهند وباكستان و قامت من أجلها الحروب ؟", answer: "كشمير" },
+{ question: "هو لقب موسى علي السلام ؟", answer: "كليم الله" },
+{ question: "طائر طويل الرجلين و المنقار أغبر له صوت حسن ؟", answer: "الكروان" },
+{ question: "ما أهم نهر في أفغانستان ؟", answer: "كابل" },
+{ question: "يطلق على السنة الميلادية التي يكون فيها شهر فبراير 29 يوما و هي تأتي كل أربع سنوات ؟", answer: "كبيسة" }
+
+            ],
+            'ل': [
+                { question: "ما هي أكثر العضلات مرونة في جسم الإنسان؟", answer: "اللسان" },
+                { question: "ما أكبر مدينة في أوروبا ؟", answer: "لندن" },
+{ question: "يكون في الصبح واحد و في الليل ثلاثة فما هو ؟", answer: "حرف اللم" },
+{ question: "هو اسم من أسماء الفضة ؟", answer: "لجين" },
+{ question: "هو الطفل الصغير الذي يوجد في الطريق و لا يعرف نسبه ؟", answer: "اللقيط" },
+{ question: "ما هو أخف المعادن ؟", answer: "الليثيوم" },
+{ question: "أين يقع نهر الكلب ؟", answer: "لبنان" },
+{ question: "من المكونات الداخلية لجهاز الكمبيوتر الشخصي ؟", answer: "اللوحة الأم" },
+{ question: "جسم مستطيل متحرك خطره عظيم إذا استخدم في الشر و بسببه يكب الناس في النار ؟", answer: "اللسان" },
+{ question: "هو علم يختص بدراسة اللغات و أصلها و تفرعها و علاقتها ببعضها البعض ؟", answer: "اللسانيات" },
+{ question: "هو الغلاف الخارجي الصلب لساق الشجرة و جذورها و أغصانها ؟", answer: "لحاء" },
+{ question: "مرض سرطان الدم ؟", answer: "اللوكيميا" },
+{ question: "من هو اليهودي الذي سحر النبي ؟", answer: "لبيد بن الأعصم" },
+{ question: "من أوصاف بقرة بني إسرائيل كما وردت في القرآن الكريم ؟", answer: "لا شية فيها" },
+{ question: "هو سيد الطعام ؟", answer: "اللحم" },
+{ question: "هي المتفرعة من اللغة الأم تتداولها الشعوب في إقليم محدود ؟", answer: "اللهجة" },
+{ question: "كلمة مناداة تعبر عن الخضوع ؟", answer: "لبيك" },
+{ question: "هو صمغ يفرز من بعض النباتات يعلك ؟", answer: "لبان" },
+{ question: "هو ما يتكون من جماعة من الناس يجتمعون لتحقيق هدف سوية ؟", answer: "لجنة" },
+{ question: "هو علبة تجعل فيها مادة متفجرة كالبارود أو الديناميت تستعمل في الحروب ؟", answer: "لغم" },
+{ question: "كتاب كتب فيه ما كان و ما سيكون إلى يوم القيامة ؟", answer: "اللوح المحفوظ" },
+{ question: "من هو النبي الذي آمن بنبي ؟", answer: "لوط" },
+{ question: "هو العالم باللغة المتفقه فيها ؟", answer: "لغوي" },
+{ question: "إحدى مدن الولايات المتحدة الأمريكية ؟", answer: "لوس أنجلوس" },
+{ question: "هو الخصم الشديد الخصومة ؟", answer: "اللدود" },
+{ question: "هو غبار لطلع ينتشر في الهواء ؟", answer: "اللقاح" },
+{ question: "أحد أكبر المعاجم العربية ألفه ابن منظور ؟", answer: "لسان العرب" },
+{ question: "هو الإشارة بالعين و نحوها للمخاطبة و الاستهزاء ؟", answer: "اللمز" },
+{ question: "أطول كلمة في القرآن ؟", answer: "ليستخلفنهم" },
+{ question: "هي الأصوات المبهمة المتعالية التي لا تفهم ؟", answer: "لغط" }
+                
+
+            ],
+            'م': [
+                { question: "من هم الزبانية؟", answer: "ملائكة العذاب" },
+                { question: "هي أمر خارق للعادة يجريه الله على أيدي أنبياء ؟", answer: "المعجزة" },
+{ question: "من أعلم هذه الأمة بالحلال و الحرام ؟", answer: "معاذ بن جبل" },
+{ question: "ما سورة الدين ؟", answer: "الماعون" },
+{ question: "ما اسم كل شيء يشغل حيزا من الكون و له ثقل ؟", answer: "المادة" },
+{ question: "من مؤسس الدولة الأموية ؟", answer: "معاوية بن أبي سفيان" },
+{ question: "من فاتح السند ؟", answer: "محمد بن القاسم" },
+{ question: "أين تقع رابطة العالم الإسلامي ؟", answer: "مكة المكرمة" },
+{ question: "ما هو الخط الذي يصل بين القطب الشمالي و القطب الجنوبي للأرض ؟", answer: "محور الأرض القطبي" },
+{ question: "أين ظهرت الدولة الطولونية و الإخشيدية ؟", answer: "مصر" },
+{ question: "هي إحدى لغات الكتابة في عهد ما قبل الميلاد ؟", answer: "المسمارية" },
+{ question: "من هم الزبانية ؟", answer: "ملائكة العذاب" },
+{ question: "الساعة الشمسية التي استخدمها العرب قديما لقياس الوقت ؟", answer: "مزولة" },
+{ question: "يدخل في تركيب جميع أعضاء جسم الإنسان ؟", answer: "الماء" },
+{ question: "حيوان بري منقرض يعتبر حجمه هائل جدا ذو قرون طويلة و هو من أجداد الفيل ؟", answer: "ماموث" },
+{ question: "ما هو الذي لا ينتفع به إلا إذا أشعلنا في عينيه ؟", answer: "الموقد" },
+{ question: "مادة مخدرة تستخدم في العمليات الجراحية ؟", answer: "مورفين" },
+{ question: "ما هو الشيء الذي يحتكم إليه كل أحد و ليس من الأحياء ؟", answer: "الميزان" },
+{ question: "غشاء الجنين الذي يخرج معه عند الولادة ؟", answer: "المشيمة" },
+{ question: "يطلبه الناس و يحتاجونه و يهربون منه إذا حضر ؟", answer: "المطر" },
+{ question: "القطار الكهربائي تحت الأرض ؟", answer: "المترو" },
+{ question: "ما الشيء الذي خرج من الماء و إذا أتى عليه الماء هلك ؟", answer: "الملح" },
+{ question: "آلة حربية استعملها الرومان لقذف الحجارة أو الذهب عن بعد ؟", answer: "المنجنيق" },
+{ question: "ما الشيء الذي لا ينتفع به إلا إذا وضعت إصبعك في عينيه ؟", answer: "المقص" },
+{ question: "آلة تستعمل لإعدام إنسان بفصل رقبته عن جسده استعملت في الثورة الفرنسية لإعدام النبلاء ؟", answer: "مقصلة" },
+{ question: "أقصر آية في القرآن ؟", answer: "مد هامتان" },
+{ question: "الأغشية التي تغلف الأمعاء و تربطها بالجدار البطني ؟", answer: "المساريقا" },
+{ question: "ماذا تسمى الميتة بالضرب ؟", answer: "الموقوذة" },
+{ question: "سباق العدو الطويل الذي مسافته 26 ميل 385 ياردة ؟", answer: "ماراثون" },
+{ question: "أشد الناس عذابا يوم القيامة ؟", answer: "المصورون" },
+{ question: "هو وصف يطلق على الرجل المحارب الذي عبأ نفسه بالأسلحة و الذخيرة ؟", answer: "مدجج" }
+            ],
+            'ن': [
+{ question: "ما هي أول فتنة بني إسرائيل؟", answer: "الناقة" },
+{ question: "ماذا يسمى طعام القادم من سفره؟", answer: "النقيعة" },
+{ question: "من المقصود بهذه الآية : ( فبهت الذي كفر )؟", answer: "النمرود" },
+{ question: "ما معنى اسم جعفر؟", answer: "النهر الصغير" },
+{ question: "ما هي الحشرة التي تكلمت في القرآن و تبسم نبي الله سليمان عليه السلام من قولها؟", answer: "النملة" },
+{ question: "هي عروق الفؤاد و القلب؟", answer: "نياط" },
+{ question: "ما اسم الدابة التي أرسلت إلى ثمود؟", answer: "ناقة الله" },
+{ question: "نقط بيض أو سود و بقع تقع في الجلد وتخالف لونه؟", answer: "نمش" },
+{ question: "ما هي الحطمة؟", answer: "النار" },
+{ question: "من الإبل طويلة العنق و هو اسم مؤنث؟", answer: "نجود" },
+{ question: "ما هي أكبر دولة إسلامية في أفريقيا؟", answer: "نيجيريا" },
+{ question: "الاسم المعرب لجهاز الفاكس؟", answer: "ناسوخ" },
+{ question: "ما هو لقب صلاح الدين الأيوبي؟", answer: "الناصر" },
+{ question: "الرئيس الأمريكي الذي استقال من منصبه بسبب فضيحة سميت بفضيحة ( واترغيت ) في السبعينيات؟", answer: "نيكسون" },
+{ question: "ماذا يسمى صوت الدجاجة؟", answer: "نقنقة" },
+{ question: "مسمى الحركة التي تزعمها الألمان في الحرب العالمية الثانية؟", answer: "النازية" },
+{ question: "ما هي الحشرة التي لها خمسة عيون؟", answer: "النحلة" },
+{ question: "هو الصور الذي سينفخ فيه إسرافيل؟", answer: "الناقور" },
+{ question: "خلقت من غير أم و لا أب؟", answer: "ناقة صالح" },
+{ question: "من مكونات مادة السيجارة؟", answer: "نيكوتين" },
+{ question: "هو عصيان المرأة و ترفعها على زوجها؟", answer: "نشوز" },
+{ question: "ما هي عاصمة كينيا؟", answer: "نيروبي" },
+{ question: "هو حفرة تحت الأرض له مدخل و مخرج ممهدة ليسير بها الإنسان و الحيوان و السيارات و غيرها؟", answer: "النفق" },
+{ question: "إحدى الدول الاسكندنافية؟", answer: "النرويج" },
+{ question: "هو المثل و النظير؟", answer: "الند" },
+{ question: "بمعنى برك الجمل و قعد؟", answer: "ناخ" },
+{ question: "حالة طبيعية تتعطل معها القوى بسبب ترقي البخارات إلى الدماغ؟", answer: "النوم" },
+{ question: "من المعادن ذات الوسط الموصل للكهرباء؟", answer: "النحس" },
+{ question: "هم الذين عرفوا قديما بكثرة الزهد و الابتعاد عن الدنيا و الانهماك بالعبادة؟", answer: "النساك" },
+{ question: "أداة استعملها النصارى قديما للإعلان عن صلاتهم؟", answer: "الناقوس" }      
+      ],
+            'ه': [
+{ question: "أين هو الموطن الأصلي لجوز الهند؟", answer: "هاواي" },
+{ question: "هي صفة بين المشي و العدو؟", answer: "هرولة" },
+{ question: "من الخليفة الذي كان يحج عاما و يغزو عاما؟", answer: "هارون الرشيد" },
+{ question: "هو الصياح بالتشجيع و التأييد؟", answer: "هتاف" },
+{ question: "ماذا يسمى أخفى ما يكون من الصوت؟", answer: "الهمس" },
+{ question: "هو الاسم يطلق على المائة من الإبل؟", answer: "هند" },
+{ question: "هو المعبد الذي تريد اليهود بناؤه على أنقاض المسجد الأقصى؟", answer: "هيكل سليمان" },
+{ question: "في اللغة هو خرق الستر عما وراءه؟", answer: "هتك" },
+{ question: "هو المنطق الفارغ الذي لا معنى له؟", answer: "هراء" },
+{ question: "من أول من سعى بين الصفا و المروة؟", answer: "هاجر أم إسماعيل عليه السلام" },
+{ question: "هو صاحب سلوكيات غير متمدنة و بربرية طائشة؟", answer: "همجي" },
+{ question: "هو تمليك الإنسان ماله لغيره في الحياة بلا عوض؟", answer: "هبة" },
+{ question: "ديانة في الهند من معتقداتهم عبادة البقر؟", answer: "هندوس" },
+{ question: "هو ما يكون للرجل من مخافة و وقار؟", answer: "هيبة" },
+{ question: "هو ما يهدى من النعيم إلى الحرم تقربا إلى الله عز و جل؟", answer: "الهدي" },
+{ question: "المسمى الذي يطلق على أرض مساحتها عشرة آلاف متر مربع؟", answer: "هكتار" },
+{ question: "هي وحدة تردد تعادل دورة في الثانية؟", answer: "هرتز" },
+{ question: "أكمل المثل: لكل عالم؟", answer: "هفوة" },
+{ question: "ماذا يطلق على صوت الموج؟", answer: "هدير" },
+{ question: "موقع شهير على شبكة الإنترنت خاص بإنشاء بريد إلكتروني مجاني؟", answer: "هوت ميل" },
+{ question: "هي الظهير و ما يوافق نصف النهار؟", answer: "هجير" },
+{ question: "ما اسم صوت الرعد؟", answer: "هزين" },
+{ question: "هي البي بي سي؟", answer: "هيئة الإذاعة البريطانية" },
+{ question: "هي عاصمة كوبا؟", answer: "هافانا" },
+{ question: "يمر وسط الغابات و الأشواك دون أن يتمزق؟", answer: "الهواء" },
+{ question: "هي إحدى القبائل في العصر الجاهلي؟", answer: "هذيل" },
+{ question: "هو مقياس هطول كمية الهواء في الأرض؟", answer: "الهيتوميتر" },
+{ question: "من هو النبي الذي بعث إلى قوم عاد؟", answer: "هود" },
+{ question: "في أي تصل اللهجات إلى 845 لهجة؟", answer: "الهند" }   
+         ],
+            'و': [
+            { question: "هو الشق بين الجبلين؟", answer: "الوادي" },
+{ question: "الميناء الثاني للجزائر و يقع في الغرب من الساحل؟", answer: "وهران" },
+{ question: "حيوان كان ينفخ في النار على إبراهيم عليه السلام و في قتله أجر؟", answer: "الوزغ" },
+{ question: "أكمل المثل الآتي: الآنَ حَمِيَ...", answer: "الوطيس" },
+{ question: "هو كل ما يتصوره الإنسان في داخله و هو غير صحيح؟", answer: "الوهم" },
+{ question: "ما معنى النمارق؟", answer: "الوسائد" },
+{ question: "أي الأيام هي مظنة ليلة القدر في رمضان؟", answer: "الوتر" },
+{ question: "من شيوخ الإمام الشافعي؟", answer: "وكيع الجراح" },
+{ question: "ما هو اسم الطين الرقيق؟", answer: "وحل" },
+{ question: "هو ما يوجد من محبة بين الطرفين؟", answer: "ود" },
+{ question: "من النجوم الفلكية عند العرب القدماء و إلى اليوم؟", answer: "الوسم" },
+{ question: "هي العظام التي تكون على الفخذ؟", answer: "الورك" },
+{ question: "أكمل المثل: تعددت الأسباب و الموت...", answer: "واحد" },
+{ question: "الغسل و المسح على أعضاء مخصوصة مع النية؟", answer: "الوضوء" },
+{ question: "برنامج مشهور لمعالجة النصوص في جهاز الحاسب الآلي؟", answer: "وورد" },
+{ question: "كتلة من الأنسجة ناتجة عن نمو غير طبيعي للخلايا؟", answer: "ورم" },
+{ question: "ماذا يسمى طعام العرس؟", answer: "وليمة" },
+{ question: "هو حيوان بري أصغر من النمر و يسمى بسنور الجبل؟", answer: "وشق" },
+{ question: "هو شرب الكلب في الإناء؟", answer: "ولغ" },
+{ question: "ما هو الشيء الذي عليك الاحتفاظ به بعد أن تعطيه لغيرك؟", answer: "الوعد" },
+{ question: "هو علم يختص بدراسة علاقات نسل الإنسان و الحيوان؟", answer: "الوراثة" },
+{ question: "في اللغة هو الحلم و الرزانة؟", answer: "الوقار" },
+{ question: "هو المطر الذي يخرج من السحاب كما ورد في القرآن الكريم؟", answer: "الودق" },
+{ question: "هو الخوف و انقباض القلب في الخلوة؟", answer: "الوحشة" },
+{ question: "وكالة الأنباء السعودية؟", answer: "واس" },
+{ question: "ما هو ركن الحج الأعظم؟", answer: "الوقوف بعرفة" },
+{ question: "اسم وادي في جهنم لكل هماز و لماز؟", answer: "ويل" },
+{ question: "هو كل شيء كالوسادة و ناعم كالحرير؟", answer: "وثار" },
+{ question: "من الثدييات التي تطير بالليل؟", answer: "الوطواط" }        
+    ],
+            'ي': [
+            { question: "من الأحجار الكريمة؟", answer: "ياقوت" },
+{ question: "قال رسول الله صلى الله عليه و سلم: (المرء على دين خليله فلينظر أحدكم من)...", answer: "يخالل" },
+{ question: "أين يقع سد مأرب؟", answer: "اليمن" },
+{ question: "من وحدات قياس الزمن؟", answer: "اليوم" },
+{ question: "أكمل الوقت أنفس ما عنيت بحفظه و أراه أسهل ما عليك...", answer: "يضيع" },
+{ question: "عنصر فلزي مشع يستخدم في صناعة القنبلة الذرية و وقودا للمفاعل النووي؟", answer: "اليورانيوم" },
+{ question: "هي نوع من أنواع الزهور؟", answer: "الياسمين" },
+{ question: "شجرها أنبتها الله تعالى لنبي الله يونس عليه السلام؟", answer: "اليقطين" },
+{ question: "من هو أول شهيد في الإسلام؟", answer: "ياسر أبو عمار" },
+{ question: "أكمل المثل: إذا أردت أن تطاع, فأمر بما...", answer: "يستطاع" },
+{ question: "متى ولد الرسول صلى الله عليه و سلم؟", answer: "يوم الاثنين 12 ربيع أول عام الفيل" },
+{ question: "تطلق على السنة الشديدة العسيرة التي لا فرج فيها؟", answer: "اليهماء" },
+{ question: "من هو النبي الذي اسم والده (متى)؟", answer: "يونس عليه السلام" },
+{ question: "هي فرقة رافضية معتقداتها مزيج من الإسلام والنصرانية؟", answer: "اليزيدية" },
+{ question: "هو ما يكون حول العنق من اللباس و الهندام؟", answer: "ياقة" },
+{ question: "ماذا يطلق على آخر جمعة من شهر رمضان المبارك؟", answer: "اليتيمة" },
+{ question: "هي مرحلة النمو التي تسبق التحول إلى فراشة؟", answer: "يرقة" },
+{ question: "هو النهر الشديد الجري الكثير الماء؟", answer: "اليعبوب" },
+{ question: "هي ملكة النحل؟", answer: "اليعسوب" },
+{ question: "هو نقيض النوم و الغفلة؟", answer: "اليقظة" },
+{ question: "هو الجدي الصغير من الظان؟", answer: "يغمور" },
+{ question: "هو عنصر بسيط رمادي ضارب إلى الزرقة و هو من الكحول يستعمل في تطهير الجروح؟", answer: "اليود" },
+{ question: "من هو النبي الذي لم يتزوج قط؟", answer: "يحي" },
+{ question: "تطلق على الشخص الذي يعتنق أفكار شيوعية؟", answer: "يساري" },
+{ question: "هي الدولة التي عاصمتها أثينا؟", answer: "اليونان" },
+{ question: "هي المنطقة الطرية المتحركة في رأس الطفل؟", answer: "اليافوخ" },
+{ question: "هو الفتى الذي صاحب نبي الله موسى عليه السلام؟", answer: "يوشع بن نون" },
+{ question: "منظمة التربية و العلم و الثقافة و هي إحدى الوكالات المتخصصة التابعة للأمم المتحدة؟", answer: "اليونسكو" },
+{ question: "هي المادة الخضراء الملونة للنبات؟", answer: "يخضور" },
+{ question: "اسم يطلق على ولد البقرة الوحشية لونه كلون التراب؟", answer: "يعفور" }            ]
+        };
+
+        // إنشاء الحروف في الصفحة
+        const lettersContainer = document.getElementById("letters");
+        let delay = 0;
+        
+        arabicLetters.forEach(letter => {
+            const letterBox = document.createElement("div");
+            letterBox.classList.add("letter-box");
+            letterBox.style.animationDelay = `${delay}s`;
+            delay += 0.05;
+            
+            const letterSpan = document.createElement("span");
+            letterSpan.textContent = letter;
+            
+            letterBox.appendChild(letterSpan);
+            letterBox.addEventListener("click", () => showQuestions(letter));
+            lettersContainer.appendChild(letterBox);
+        });
+
+        // زر الرجوع
+        document.getElementById("back-button").addEventListener("click", () => {
+            document.getElementById("questions-container").classList.remove("show");
+            setTimeout(() => {
+                document.getElementById("questions-container").classList.add("hidden");
+            }, 500);
+        });
+
+        function showQuestions(letter) {
+    const questionsContainer = document.getElementById("questions-container");
+    const currentLetterSpan = document.getElementById("current-letter");
+    const questionsList = document.getElementById("questions-list");
+    
+    // تفعيل الحرف المختار
+    document.querySelectorAll(".letter-box").forEach(box => {
+        box.classList.remove("active");
+        if (box.querySelector("span").textContent === letter) {
+            box.classList.add("active");
+        }
+    });
+
+    currentLetterSpan.textContent = letter;
+    questionsList.innerHTML = "";
+
+    if (questionsAndAnswers[letter]) {
+        questionsAndAnswers[letter].forEach((item, index) => {
+            const questionItem = document.createElement("div");
+            questionItem.classList.add("question-item");
+            questionItem.style.animationDelay = `${index * 0.1}s`;
+            
+            const questionText = document.createElement("div");
+            questionText.classList.add("question");
+            questionText.textContent = item.question;
+            
+            const answerText = document.createElement("div");
+            answerText.classList.add("answer");
+            answerText.textContent = item.answer;
+            
+            questionText.addEventListener("click", () => {
+                questionText.classList.toggle("active");
+                answerText.classList.toggle("show");
+            });
+            
+            questionItem.appendChild(questionText);
+            questionItem.appendChild(answerText);
+            
+            // إضافة الأزرار للسؤال
+            const buttonContainer = document.createElement("div");
+            buttonContainer.className = "button-container";
+            
+            const markAnswered = document.createElement("button");
+            markAnswered.textContent = "تمت الإجابة";
+            markAnswered.className = "mark-button answered-button";
+            
+            const markSkipped = document.createElement("button");
+            markSkipped.textContent = "تخطي";
+            markSkipped.className = "mark-button skipped-button";
+            
+            buttonContainer.appendChild(markAnswered);
+            buttonContainer.appendChild(markSkipped);
+            questionItem.appendChild(buttonContainer);
+            
+            // إضافة استرجاع حالة السؤال إذا كانت محفوظة
+            const questionKey = `${letter}-${index}`;
+            const savedState = localStorage.getItem(questionKey);
+            if (savedState === "answered") {
+                questionItem.classList.add("answered");
+            } else if (savedState === "skipped") {
+                questionItem.classList.add("skipped");
+            }
+            
+            // إضافة وظائف للأزرار
+            markAnswered.addEventListener("click", function(e) {
+                e.stopPropagation();
+                questionItem.classList.remove("skipped");
+                
+                // تبديل حالة "تمت الإجابة"
+                if (questionItem.classList.contains("answered")) {
+                    questionItem.classList.remove("answered");
+                    localStorage.removeItem(questionKey);
+                } else {
+                    questionItem.classList.add("answered");
+                    localStorage.setItem(questionKey, "answered");
+                }
+            });
+            
+            markSkipped.addEventListener("click", function(e) {
+                e.stopPropagation();
+                questionItem.classList.remove("answered");
+                
+                // تبديل حالة "تخطي"
+                if (questionItem.classList.contains("skipped")) {
+                    questionItem.classList.remove("skipped");
+                    localStorage.removeItem(questionKey);
+                } else {
+                    questionItem.classList.add("skipped");
+                    localStorage.setItem(questionKey, "skipped");
+                }
+            });
+            
+            questionsList.appendChild(questionItem);
+        });
+    }
+
+    questionsContainer.classList.remove("hidden");
+    setTimeout(() => {
+        questionsContainer.classList.add("show");
+    }, 10);
+        }
+
+        // إضافة تأثير حركة للحروف عند تحميل الصفحة
+        window.addEventListener("load", () => {
+            document.querySelectorAll(".letter-box").forEach((box, index) => {
+                setTimeout(() => {
+                    box.style.opacity = "1";
+                    box.style.transform = "translateY(0) rotateY(0)";
+                }, index * 50);
+            });
+            // هذه هي الدالة التي تعرض الأسئلة - استبدل بها الدالة الحالية
+            function showQuestions(letter) {
+    const questionsContainer = document.getElementById("questions-container");
+    const currentLetterSpan = document.getElementById("current-letter");
+    const questionsList = document.getElementById("questions-list");
+    
+    // تفعيل الحرف المختار
+    document.querySelectorAll(".letter-box").forEach(box => {
+        box.classList.remove("active");
+        if (box.querySelector("span").textContent === letter) {
+            box.classList.add("active");
+        }
+    });
+
+    currentLetterSpan.textContent = letter;
+    questionsList.innerHTML = "";
+
+    if (questionsAndAnswers[letter]) {
+        questionsAndAnswers[letter].forEach((item, index) => {
+            const questionItem = document.createElement("div");
+            questionItem.classList.add("question-item");
+            questionItem.style.animationDelay = `${index * 0.1}s`;
+            
+            const questionText = document.createElement("div");
+            questionText.classList.add("question");
+            questionText.textContent = item.question;
+            
+            const answerText = document.createElement("div");
+            answerText.classList.add("answer");
+            answerText.textContent = item.answer;
+            
+            questionText.addEventListener("click", () => {
+                questionText.classList.toggle("active");
+                answerText.classList.toggle("show");
+            });
+            
+            questionItem.appendChild(questionText);
+            questionItem.appendChild(answerText);
+            
+            // إضافة الأزرار المحسنة
+            const actionsContainer = document.createElement("div");
+            actionsContainer.className = "question-actions";
+            
+            // زر تمت الإجابة
+            const markAnswered = document.createElement("button");
+            markAnswered.className = "action-button answer-button";
+            markAnswered.innerHTML = '<i class="fas fa-check"></i> تمت الإجابة';
+            
+            // زر التخطي
+            const markSkipped = document.createElement("button");
+            markSkipped.className = "action-button skip-button";
+            markSkipped.innerHTML = '<i class="fas fa-forward"></i> تخطي';
+            
+            actionsContainer.appendChild(markAnswered);
+            actionsContainer.appendChild(markSkipped);
+            questionItem.appendChild(actionsContainer);
+            
+            // استرجاع الحالة المحفوظة
+            const questionKey = `${letter}-${index}`;
+            const savedState = localStorage.getItem(questionKey);
+            if (savedState === "answered") {
+                questionItem.classList.add("answered");
+            } else if (savedState === "skipped") {
+                questionItem.classList.add("skipped");
+            }
+            
+            // إضافة وظائف للأزرار
+            markAnswered.addEventListener("click", function(e) {
+                e.stopPropagation();
+                
+                // تطبيق تأثير متحرك
+                if (!questionItem.classList.contains("answered")) {
+                    const ripple = document.createElement("span");
+                    ripple.className = "ripple";
+                    ripple.style.cssText = `
+                        position: absolute;
+                        background: rgba(231, 76, 60, 0.2);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple-effect 0.6s linear;
+                        left: ${e.offsetX}px;
+                        top: ${e.offsetY}px;
+                    `;
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                }
+                
+                questionItem.classList.remove("skipped");
+                
+                if (questionItem.classList.contains("answered")) {
+                    questionItem.classList.remove("answered");
+                    localStorage.removeItem(questionKey);
+                } else {
+                    questionItem.classList.add("answered");
+                    localStorage.setItem(questionKey, "answered");
+                }
+            });
+            
+            markSkipped.addEventListener("click", function(e) {
+                e.stopPropagation();
+                
+                // تطبيق تأثير متحرك
+                if (!questionItem.classList.contains("skipped")) {
+                    const ripple = document.createElement("span");
+                    ripple.className = "ripple";
+                    ripple.style.cssText = `
+                        position: absolute;
+                        background: rgba(243, 156, 18, 0.2);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple-effect 0.6s linear;
+                        left: ${e.offsetX}px;
+                        top: ${e.offsetY}px;
+                    `;
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                }
+                
+                questionItem.classList.remove("answered");
+                
+                if (questionItem.classList.contains("skipped")) {
+                    questionItem.classList.remove("skipped");
+                    localStorage.removeItem(questionKey);
+                } else {
+                    questionItem.classList.add("skipped");
+                    localStorage.setItem(questionKey, "skipped");
+                }
+            });
+            
+            questionsList.appendChild(questionItem);
+        });
+    }
+
+    questionsContainer.classList.remove("hidden");
+    setTimeout(() => {
+        questionsContainer.classList.add("show");
+    }, 10);
+
+}
+        });
+    </script>
+</body>
+</html>
