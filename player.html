@@ -6,25 +6,18 @@
     <title>شاشة اللاعب</title>
     <style>
         body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden;}
-        
         #colorModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; gap: 20px;}
         .team-btn { border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 15px; color: white; cursor: pointer; width: 80%; max-width: 300px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);}
         .btn-green { background-color: #4CAF50; border: 3px solid #388E3C; }
         .btn-orange { background-color: #FF9800; border: 3px solid #F57C00; }
-
-        #gameScreen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; transition: background-color 0.2s; }
-        
+        #gameScreen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
         .status-bar { width: 100%; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.5); z-index: 10;}
-        
-        .big-buzzer { flex: 1; width: 90%; margin: 15px; border-radius: 30px; border: none; font-size: 3rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, opacity 0.3s;}
+        .big-buzzer { flex: 1; width: 90%; margin: 15px; border-radius: 30px; border: none; font-size: 3rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s;}
         .big-buzzer:active { transform: scale(0.95); }
-        .big-buzzer:disabled { opacity: 0.4; cursor: not-allowed; transform: scale(1); }
+        .big-buzzer:disabled { opacity: 0.4; cursor: not-allowed; }
         .big-buzzer.penalty { background-color: #475569 !important; border: 3px dashed #ef4444; color: #ef4444;}
-
         .iframe-container { width: 95%; height: 45vh; margin-bottom: 20px; border-radius: 20px; overflow: hidden; background: white; border: 3px solid #64748b;}
         iframe { width: 100%; height: 100%; border: none; }
-        
-        .top-score { width: 100%; display: flex; justify-content: space-around; padding: 10px; background: #0f172a; font-weight: bold;}
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -47,23 +40,14 @@
         let myColor = "";
         let myTeamName = "";
         
-        let serverTimeOffset = 0;
-        let currentBuzzerData = null;
-
+        // مرجع قاعدة البيانات
         const buzzerRef = ref(db, `rooms/${pin}/buzzer`);
-        const scoreRef = ref(db, `rooms/${pin}/score`);
         
         const statusBar = document.getElementById('statusBar');
         const gameScreen = document.getElementById('gameScreen');
         const buzzerBtn = document.getElementById('buzzerBtn');
 
         document.getElementById('gridFrame').src = `letters.html?pin=${pin}&role=player`;
-
-        // مزامنة الوقت
-        onValue(ref(db, ".info/serverTimeOffset"), (snap) => {
-            serverTimeOffset = snap.val() || 0;
-        });
-        function getServerTime() { return Date.now() + serverTimeOffset; }
 
         window.selectTeam = function(id, colorHex, teamName) {
             myTeamId = id;
@@ -76,114 +60,94 @@
             buzzerBtn.innerText = teamName;
         };
 
-        // عرض النتيجة
-        onValue(scoreRef, (snapshot) => {
-            if(snapshot.exists()) {
-                const s = snapshot.val();
-                document.getElementById('pScoreGreen').innerText = `الأخضر: ${s.green||0}`;
-                document.getElementById('pScoreOrange').innerText = `البرتقالي: ${s.orange||0}`;
-            }
-        });
-
-        // الاستماع لحالة الزر والعقوبات
+        // الاستماع لحالة الزر
         onValue(buzzerRef, (snapshot) => {
             if (snapshot.exists()) {
-                currentBuzzerData = snapshot.val();
-                checkBuzzerState();
+                const data = snapshot.val();
+                
+                // حالة 1: شخص ضغط الزر
+                if (data.status === 'buzzed') {
+                    buzzerBtn.disabled = true;
+                    buzzerBtn.classList.remove('penalty');
+                    gameScreen.style.backgroundColor = data.color; // شاشة الجميع تتلون بلون الفائز
+                    
+                    if (data.teamId === myTeamId) {
+                        statusBar.innerText = "🏆 أنت الأسرع!";
+                        buzzerBtn.innerText = "إجابة...";
+                    } else {
+                        statusBar.innerText = `❌ ${data.teamName} يجيب الآن`;
+                        buzzerBtn.innerText = "مغلق";
+                    }
+                } 
+                // حالة 2: انتظار (اللعب مفتوح)
+                else {
+                    gameScreen.style.backgroundColor = "#1e293b";
+                    
+                    // هل أنا معاقب؟
+                    if (data.lockedTeam === myTeamId) {
+                        const now = Date.now();
+                        // حساب الوقت المتبقي (تقريبي بسيط لتفادي تعقيد التوقيت)
+                        if (data.unlockTime > now) {
+                            buzzerBtn.disabled = true;
+                            buzzerBtn.classList.add('penalty');
+                            buzzerBtn.innerText = "عقوبة ⏳";
+                            statusBar.innerText = "أنت معاقب مؤقتاً";
+                            
+                            // عداد محلي لفك العقوبة
+                            setTimeout(() => {
+                                // لا نفعل شيء، ننتظر تحديث من السيرفر أو انتهاء الوقت
+                                // لكن يمكننا إعادة التحقق
+                            }, data.unlockTime - now);
+                        } else {
+                            // انتهى وقت العقوبة
+                            buzzerBtn.disabled = false;
+                            buzzerBtn.classList.remove('penalty');
+                            buzzerBtn.innerText = myTeamName;
+                            statusBar.innerText = "انتهت العقوبة، انطلق!";
+                        }
+                    } else {
+                        // لست معاقباً واللعب مفتوح
+                        buzzerBtn.disabled = false;
+                        buzzerBtn.classList.remove('penalty');
+                        buzzerBtn.innerText = myTeamName;
+                        statusBar.innerText = "جاهز للضغط!";
+                    }
+                }
             }
         });
 
-        function checkBuzzerState() {
-            if (!currentBuzzerData) return;
-
-            // إذا كان شخص ما قد ضغط الزر الآن
-            if (currentBuzzerData.status === 'buzzed') {
-                buzzerBtn.disabled = true;
-                buzzerBtn.classList.remove('penalty');
-                gameScreen.style.backgroundColor = currentBuzzerData.color;
-                
-                if (currentBuzzerData.teamId === myTeamId) {
-                    statusBar.innerText = "🏆 أنت الأسرع! أجب الآن";
-                    buzzerBtn.innerText = "تحدث...";
-                } else {
-                    statusBar.innerText = `❌ ${currentBuzzerData.teamName} يجيب الآن`;
-                    buzzerBtn.innerText = "مغلق";
-                }
-            } 
-            // إذا كان النظام في وضع الانتظار (جاهز للضغط)
-            else if (currentBuzzerData.status === 'waiting') {
-                gameScreen.style.backgroundColor = "#1e293b";
-                
-                // هل فريقي معاقب؟
-                if (currentBuzzerData.lockedTeam === myTeamId) {
-                    const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
-                    if (timeLeft > 0) {
-                        // تطبيق العقوبة
-                        buzzerBtn.disabled = true;
-                        buzzerBtn.classList.add('penalty');
-                        statusBar.innerText = `⚠️ إجابة خاطئة! عقوبة إيقاف مؤقت`;
-                    } else {
-                        // انتهت العقوبة
-                        unlockMyBuzzer();
-                    }
-                } else {
-                    // فريقي غير معاقب، أو عقوبة الفريق الآخر
-                    unlockMyBuzzer();
-                }
-            }
-        }
-
-        function unlockMyBuzzer() {
-            buzzerBtn.disabled = false;
-            buzzerBtn.classList.remove('penalty');
-            buzzerBtn.innerText = myTeamName;
-            
-            if (currentBuzzerData && currentBuzzerData.lockedTeam && currentBuzzerData.lockedTeam !== myTeamId && currentBuzzerData.lockedTeam !== '') {
-                const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
-                if (timeLeft > 0) {
-                    statusBar.innerText = "🔥 فرصة للسرقة! الخصم معاقب";
-                    return;
-                }
-            }
-            statusBar.innerText = "🟢 جاهز للضغط.. انطلق!";
-        }
-
-        // حلقة تكرار (Loop) للتحكم بعداد الثواني محلياً
-        setInterval(() => {
-            if (currentBuzzerData && currentBuzzerData.status === 'waiting' && currentBuzzerData.lockedTeam === myTeamId) {
-                const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
-                if (timeLeft > 0) {
-                    buzzerBtn.innerText = `عقوبة (${timeLeft})`;
-                } else {
-                    // فك العقوبة بمجرد انتهاء الوقت
-                    checkBuzzerState();
-                }
-            }
-        }, 100);
-
-        // دالة الضغط الصارمة
         window.pressBuzzer = async function() {
             if (buzzerBtn.disabled) return;
             
+            // تعطيل فوري محلي
             buzzerBtn.disabled = true;
-            statusBar.innerText = "جاري التحقق ⏳...";
 
             try {
                 await runTransaction(buzzerRef, (currentData) => {
+                    // إذا لم يكن هناك بيانات أو الحالة انتظار
                     if (currentData === null || currentData.status === 'waiting') {
-                        // التأكد أنني لست معاقباً في السيرفر أيضاً
-                        if (currentData && currentData.lockedTeam === myTeamId && currentData.unlockTime > getServerTime()) {
-                            return; // أرفض الضغطة
+                        // تأكد أنني لست معاقباً (أمان إضافي في السيرفر)
+                        if (currentData && currentData.lockedTeam === myTeamId && currentData.unlockTime > Date.now()) {
+                            return; // الغاء العملية
                         }
-                        return { status: 'buzzed', teamId: myTeamId, teamName: myTeamName, color: myColor, lockedTeam: '', unlockTime: 0 };
+                        return { 
+                            status: 'buzzed', 
+                            teamId: myTeamId, 
+                            teamName: myTeamName, 
+                            color: myColor,
+                            lockedTeam: '', // تصفير العقوبات القديمة عند الفوز الجديد
+                            unlockTime: 0
+                        };
                     }
-                    return; // شخص آخر سبقني
+                    return; // شخص آخر سبق
                 });
             } catch (error) {
-                buzzerBtn.disabled = false;
+                console.log(error);
+                buzzerBtn.disabled = false; // إعادة التفعيل في حال الفشل
             }
         };
-
+        
+        // دعم اللمس
         buzzerBtn.addEventListener('touchstart', function(e) { e.preventDefault(); window.pressBuzzer(); }, {passive: false});
 
     </script>
@@ -196,16 +160,8 @@
     </div>
 
     <div id="gameScreen">
-        <div class="top-score">
-            <span id="pScoreGreen" style="color:#4CAF50;">الأخضر: 0</span>
-            <span style="color:#94a3b8;">(الأفضل من 3)</span>
-            <span id="pScoreOrange" style="color:#FF9800;">البرتقالي: 0</span>
-        </div>
-        
-        <div class="status-bar" id="statusBar">🟢 جاهز للضغط.. انطلق!</div>
-        
+        <div class="status-bar" id="statusBar">جاري الاتصال...</div>
         <button id="buzzerBtn" class="big-buzzer" onclick="pressBuzzer()"></button>
-
         <div class="iframe-container">
             <iframe id="gridFrame"></iframe>
         </div>
