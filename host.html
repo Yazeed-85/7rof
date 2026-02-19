@@ -3,82 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة الهوست - سباق الأزرار</title>
+    <title>شاشة الهوست</title>
     <style>
         body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .pin-display { font-size: 3rem; font-weight: bold; color: #fbbf24; letter-spacing: 5px; background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 15px; border: 2px dashed #fbbf24; }
+        .header { display: flex; justify-content: space-between; width: 100%; max-width: 900px; align-items: center; margin-bottom: 20px; }
+        .pin-box { background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 10px; border: 1px dashed #fbbf24; text-align: center;}
+        .pin-display { font-size: 2rem; font-weight: bold; color: #fbbf24; letter-spacing: 3px; }
         
-        .winner-box { width: 100%; max-width: 600px; height: 120px; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; transition: background 0.3s; margin-bottom: 20px; background: #334155; border: 2px solid #475569;}
-        
-        .reset-btn { background: #ef4444; color: white; border: none; padding: 15px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); margin-bottom: 20px;}
-        .reset-btn:active { transform: scale(0.95); }
+        /* لوحة النتائج */
+        .scoreboard { display: flex; gap: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 15px; }
+        .score-team { display: flex; flex-direction: column; align-items: center; font-weight: bold; font-size: 1.2rem;}
+        .score-num { font-size: 2.5rem; }
+        .green-text { color: #4CAF50; }
+        .orange-text { color: #FF9800; }
+        .score-btns { display: flex; gap: 5px; margin-top: 5px; }
+        .s-btn { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white;}
 
-        .iframe-container { width: 100%; max-width: 800px; height: 500px; border-radius: 20px; overflow: hidden; border: 3px solid #38bdf8; background: white;}
+        /* حالة الزر */
+        .buzzer-status { width: 100%; max-width: 900px; padding: 20px; border-radius: 15px; text-align: center; font-size: 1.8rem; font-weight: bold; margin-bottom: 20px; background: #334155; border: 2px solid #475569; transition: background 0.3s;}
+        
+        .action-btns { display: none; gap: 15px; margin-top: 15px; justify-content: center; }
+        .action-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; }
+        .btn-correct { background: #10b981; }
+        .btn-wrong { background: #ef4444; }
+
+        .iframe-container { width: 100%; max-width: 900px; height: 500px; border-radius: 20px; overflow: hidden; border: 3px solid #64748b; background: white;}
         iframe { width: 100%; height: 100%; border: none; }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB5CobIKfYdAz8jaabJpMQrGoqS9Ton28Y",
             authDomain: "buttons-f3501.firebaseapp.com",
             databaseURL: "https://buttons-f3501-default-rtdb.firebaseio.com",
-            projectId: "buttons-f3501",
-            storageBucket: "buttons-f3501.appspot.com",
-            messagingSenderId: "773064924745",
-            appId: "1:773064924745:web:a6b2260f7947d64227a998"
+            projectId: "buttons-f3501"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // جلب الـ PIN من الرابط
         const urlParams = new URLSearchParams(window.location.search);
         const pin = urlParams.get('pin');
         document.getElementById('pinDisplay').innerText = pin;
-
-        // ربط الـ iframe مع تمرير الـ PIN ودور الهوست
         document.getElementById('gridFrame').src = `letters.html?pin=${pin}&role=host`;
 
-        const winnerBox = document.getElementById('winnerBox');
-        const roomRef = ref(db, `rooms/${pin}/winner`);
+        const buzzerRef = ref(db, `rooms/${pin}/buzzer`);
+        const scoreRef = ref(db, `rooms/${pin}/score`);
+        
+        let currentBuzzedTeam = "";
+        let serverTimeOffset = 0;
 
-        // الاستماع الصارم لنتيجة الفائز
-        onValue(roomRef, (snapshot) => {
+        // مزامنة الوقت لتطبيق العقوبة بدقة
+        onValue(ref(db, ".info/serverTimeOffset"), (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+
+        // الاستماع لحالة الأزرار
+        onValue(buzzerRef, (snapshot) => {
+            const statusBox = document.getElementById('buzzerStatus');
+            const actions = document.getElementById('actionBtns');
+            
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                winnerBox.innerText = `🏆 الفائز: ${data.team}`;
-                winnerBox.style.backgroundColor = data.color;
-                winnerBox.style.color = "#ffffff";
+                if (data.status === 'buzzed') {
+                    currentBuzzedTeam = data.teamId;
+                    statusBox.innerText = `🚨 ${data.teamName} يضغط ويجيب الآن!`;
+                    statusBox.style.backgroundColor = data.color;
+                    statusBox.style.color = "#fff";
+                    actions.style.display = "flex";
+                } else if (data.status === 'waiting') {
+                    statusBox.innerText = "🟢 في انتظار الضغطات...";
+                    statusBox.style.backgroundColor = "#334155";
+                    statusBox.style.color = "#fff";
+                    actions.style.display = "none";
+                }
             } else {
-                winnerBox.innerText = "⏳ في انتظار الضغطة...";
-                winnerBox.style.backgroundColor = "#334155";
+                // تهيئة مبدئية
+                resetBuzzer();
             }
         });
 
-        // زر تصفير الجولة
-        window.resetRound = function() {
-            remove(roomRef); // مسح الفائز لبدء جولة جديدة
-            // يمكنك أيضا إضافة كود لمسح الحروف هنا إذا أردت
+        // الاستماع للنتيجة
+        onValue(scoreRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const s = snapshot.val();
+                document.getElementById('scoreGreen').innerText = s.green || 0;
+                document.getElementById('scoreOrange').innerText = s.orange || 0;
+                
+                if (s.green >= 2) alert("🎉 مبروك! الفريق الأخضر فاز باللعبة (2 من 3)");
+                if (s.orange >= 2) alert("🎉 مبروك! الفريق البرتقالي فاز باللعبة (2 من 3)");
+            } else {
+                set(scoreRef, { green: 0, orange: 0 });
+            }
+        });
+
+        // تحرير الزر (إجابة صحيحة)
+        window.answerCorrect = function() {
+            set(buzzerRef, { status: 'waiting', teamId: '', teamName: '', color: '', lockedTeam: '', unlockTime: 0 });
+        };
+
+        // عقوبة 5 ثواني (إجابة خاطئة)
+        window.answerWrong = function() {
+            const unlockTimestamp = Date.now() + serverTimeOffset + 5000; // وقت السيرفر + 5 ثواني
+            set(buzzerRef, { 
+                status: 'waiting', 
+                teamId: '', 
+                teamName: '', 
+                color: '', 
+                lockedTeam: currentBuzzedTeam, 
+                unlockTime: unlockTimestamp 
+            });
+        };
+
+        window.resetBuzzer = function() {
+            set(buzzerRef, { status: 'waiting', teamId: '', teamName: '', color: '', lockedTeam: '', unlockTime: 0 });
+        };
+
+        // إدارة النقاط
+        window.updateScore = async function(team, amount) {
+            const snap = await get(scoreRef);
+            let current = snap.val() || { green: 0, orange: 0 };
+            current[team] = Math.max(0, (current[team] || 0) + amount);
+            set(scoreRef, current);
         };
         
-        // مسح الغرفة عند إغلاق الهوست للصفحة (اختياري)
-        window.addEventListener("beforeunload", () => {
-             remove(ref(db, `rooms/${pin}`));
-        });
+        window.resetScore = function() {
+            if(confirm("تصفير النتيجة والبدء من جديد؟")) set(scoreRef, { green: 0, orange: 0 });
+        };
+
     </script>
 </head>
 <body>
     <div class="header">
-        <p style="margin: 0; color: #94a3b8; font-size: 1.2rem;">كود الغرفة</p>
-        <div class="pin-display" id="pinDisplay">----</div>
+        <div class="pin-box">
+            <div style="color: #94a3b8; font-size: 0.9rem;">كود الغرفة</div>
+            <div class="pin-display" id="pinDisplay">----</div>
+        </div>
+
+        <div class="scoreboard">
+            <div class="score-team green-text">
+                <div>الأخضر</div>
+                <div class="score-num" id="scoreGreen">0</div>
+                <div class="score-btns">
+                    <button class="s-btn" style="background:#4CAF50;" onclick="updateScore('green', 1)">+1</button>
+                    <button class="s-btn" style="background:#ef4444;" onclick="updateScore('green', -1)">-1</button>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; justify-content:center; gap:10px;">
+                <span style="font-weight:bold; color:#94a3b8;">Best of 3</span>
+                <button class="s-btn" style="background:#64748b;" onclick="resetScore()">تصفير</button>
+            </div>
+            <div class="score-team orange-text">
+                <div>البرتقالي</div>
+                <div class="score-num" id="scoreOrange">0</div>
+                <div class="score-btns">
+                    <button class="s-btn" style="background:#FF9800;" onclick="updateScore('orange', 1)">+1</button>
+                    <button class="s-btn" style="background:#ef4444;" onclick="updateScore('orange', -1)">-1</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="winner-box" id="winnerBox">⏳ في انتظار الضغطة...</div>
-
-    <button class="reset-btn" onclick="resetRound()">🔄 تصفير الجولة للأزرار</button>
+    <div class="buzzer-status">
+        <div id="buzzerStatus">جاري الاتصال...</div>
+        <div class="action-btns" id="actionBtns">
+            <button class="action-btn btn-correct" onclick="answerCorrect()">✅ إجابة صحيحة (تحرير)</button>
+            <button class="action-btn btn-wrong" onclick="answerWrong()">❌ خاطئة (عقوبة 5 ثواني)</button>
+        </div>
+    </div>
+    
+    <button style="margin-bottom:15px; background:none; color:#38bdf8; border:1px solid #38bdf8; padding:5px 15px; border-radius:5px; cursor:pointer;" onclick="resetBuzzer()">إلغاء أي عقوبة وتحرير يدوي</button>
 
     <div class="iframe-container">
         <iframe id="gridFrame"></iframe>
