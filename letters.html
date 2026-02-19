@@ -7,14 +7,13 @@
   <style>
     body { 
         margin: 0; padding: 0; 
-        background-color: #1a1a1a; /* خلفية داكنة جداً خارج اللعبة */
+        background-color: #1a1a1a; 
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; 
     }
     
-    /* أدوات الهوست */
     .host-tools { 
-        display: flex; gap: 10px; margin-bottom: 15px; z-index: 100;
+        display: flex; gap: 10px; margin-bottom: 20px; z-index: 100;
         background: rgba(255,255,255,0.1); padding: 8px; border-radius: 12px;
     }
     .tool-btn { padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.1s;}
@@ -24,34 +23,33 @@
     .btn-shuffle { background: #334155; border: 2px solid #64748b;}
     .selected { box-shadow: 0 0 0 3px #fff, 0 0 10px #000; transform: scale(1.05); }
 
-    /* حاوية اللعبة الرئيسية */
+    /* الحاوية المحكمة تماماً حول الخلية */
     .game-board-container {
         position: relative;
-        width: 95%;
-        max-width: 700px;
-        aspect-ratio: 4/3; /* الحفاظ على نسبة الأبعاد */
-        border-radius: 15px;
+        width: 90%;
+        max-width: 550px;
+        /* نسبة تناسب حجم الخلايا السداسية بالضبط */
+        aspect-ratio: 4 / 3.2; 
+        border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        background-color: #2e7d32; /* اللون الأخضر الأساسي (الوسط) */
+        background-color: #2e7d32; /* الوسط واليمين واليسار أخضر */
         border: 4px solid #fff;
     }
 
-    /* المناطق البرتقالية (فوق وتحت) */
+    /* الأشرطة البرتقالية (متلاصقة مع الحروف) */
     .zone-orange-top { 
-        position: absolute; top: 0; left: 0; width: 100%; height: 18%; 
+        position: absolute; top: 0; left: 0; width: 100%; height: 16%; 
         background-color: #FF9800; 
-        border-bottom: 4px solid rgba(0,0,0,0.2);
         z-index: 1;
     }
     .zone-orange-bottom { 
-        position: absolute; bottom: 0; left: 0; width: 100%; height: 18%; 
+        position: absolute; bottom: 0; left: 0; width: 100%; height: 16%; 
         background-color: #FF9800; 
-        border-top: 4px solid rgba(0,0,0,0.2);
         z-index: 1;
     }
 
-    /* الشبكة العائمة */
+    /* حاوية الشبكة */
     .grid-container { 
         position: absolute; 
         top: 0; left: 0; width: 100%; height: 100%;
@@ -59,17 +57,13 @@
         display: flex; justify-content: center; align-items: center;
     }
 
-    /* تصميم الخلايا */
-    .hex-cell { cursor: pointer; transition: transform 0.1s; filter: drop-shadow(3px 5px 2px rgba(0,0,0,0.4)); }
+    .hex-cell { cursor: pointer; transition: transform 0.1s; filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5)); }
     .hex-cell:active { transform: scale(0.95); }
-    .hex-cell path { stroke: #333; stroke-width: 1.5px; }
-    
+    .hex-cell path { stroke: #1a1a1a; stroke-width: 2px; }
     text { pointer-events: none; user-select: none; font-family: 'Segoe UI', sans-serif; }
     
-    /* وضع اللاعب */
     body.player-mode .hex-cell { cursor: not-allowed; pointer-events: none; }
     body.player-mode .host-tools { display: none !important; }
-
   </style>
 </head>
 <body>
@@ -82,9 +76,11 @@
   </div>
 
   <div class="game-board-container">
-      
-      <div class="zone-orange-top"></div> <div class="zone-orange-bottom"></div> <div class="grid-container" id="hexGrid">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="100%" height="85%">
+      <div class="zone-orange-top"></div>
+      <div class="zone-orange-bottom"></div>
+
+      <div class="grid-container" id="hexGrid">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="65 80 340 280" width="100%" height="100%">
           <defs>
             <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
@@ -158,7 +154,6 @@
                     const path = cell.querySelector("path");
                     if (text && cellData.letter) {
                         text.textContent = cellData.letter;
-                        // لون النص أبيض إذا كانت الخلية ملونة
                         if(cellData.color && cellData.color !== "url(#hexGradient)"){
                             text.setAttribute("fill", "white");
                         } else {
@@ -182,11 +177,7 @@
             cell.addEventListener("click", function() {
                 const index = this.getAttribute("data-index");
                 const letter = this.querySelector("text").textContent;
-                
-                set(ref(database, `rooms/${pin}/grid/${index}`), {
-                    letter: letter,
-                    color: activePaintColor
-                });
+                set(ref(database, `rooms/${pin}/grid/${index}`), { letter: letter, color: activePaintColor });
             });
         });
 
@@ -196,7 +187,6 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [letters[i], letters[j]] = [letters[j], letters[i]];
             }
-            
             const updates = {};
             document.querySelectorAll(".hex-cell").forEach((cell, index) => {
                 updates[index] = { letter: letters[index] || "؟", color: "url(#hexGradient)" };
