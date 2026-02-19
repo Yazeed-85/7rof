@@ -8,9 +8,8 @@
         body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { display: flex; justify-content: center; width: 100%; max-width: 900px; margin-bottom: 20px; position: relative;}
         
-        /* زر بنك الأسئلة الجديد للهوست */
         .questions-btn { position: absolute; left: 0; top: 0; background: linear-gradient(135deg, #2a6496, #1c4c7c); color: white; border: none; padding: 12px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s;}
-        .questions-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.4);}
+        .questions-btn:hover { transform: translateY(-3px); }
         .questions-btn:active { transform: scale(0.95); }
 
         .pin-box { background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 15px; border: 2px dashed #fbbf24; text-align: center;}
@@ -58,7 +57,7 @@
         });
         function getServerTime() { return Date.now() + serverTimeOffset; }
 
-        set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
+        set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0, lockedTeam: '', unlockTime: 0 });
 
         onValue(buzzerRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -72,65 +71,75 @@
             const actions = document.getElementById('actionBtns');
             
             if (currentState.status === 'buzzed') {
-                statusBox.innerText = `🚨 ${currentState.buzzedTeamName} يضغط ويجيب الآن!`;
                 statusBox.style.backgroundColor = currentState.buzzedColor;
                 statusBox.style.color = "#fff";
                 actions.style.display = "flex";
+                // النص يتحدث عبر setInterval
             } else if (currentState.status === 'penalty') {
                 actions.style.display = "none";
             } else {
-                statusBox.innerText = "🟢 في انتظار الضغطات (اللعب مفتوح للجميع)";
+                statusBox.innerText = "🟢 في انتظار الضغطات (مفتوح للجميع)";
                 statusBox.style.backgroundColor = "#334155";
                 statusBox.style.color = "#fff";
                 actions.style.display = "none";
             }
         }
 
+        // عدادات الهوست
         setInterval(() => {
+            const now = getServerTime();
+            const statusBox = document.getElementById('buzzerStatus');
+
+            // عداد الإجابة (5 ثواني)
+            if (currentState.status === 'buzzed') {
+                const timeLeft = Math.ceil((currentState.buzzedTime + 5000 - now) / 1000);
+                if (timeLeft > 0) {
+                    statusBox.innerText = `🚨 ${currentState.buzzedTeamName} يجيب الآن: ${timeLeft} ثواني`;
+                } else {
+                    statusBox.innerText = `⏳ انتهى الوقت! قرر الإجابة`;
+                }
+            }
+            
+            // عداد العقوبة (5 ثواني)
             if (currentState.status === 'penalty' && currentState.lockedTeam) {
-                const timeLeft = Math.ceil((currentState.unlockTime - getServerTime()) / 1000);
-                const statusBox = document.getElementById('buzzerStatus');
-                
+                const timeLeft = Math.ceil((currentState.unlockTime - now) / 1000);
                 if (timeLeft > 0) {
                     const tName = currentState.lockedTeam === 'green' ? 'الأخضر' : 'البرتقالي';
-                    statusBox.innerText = `⏳ عقوبة الفريق ${tName} تنتهي بعد: ${timeLeft} ثواني`;
+                    statusBox.innerText = `⏳ عقوبة ${tName} تنتهي بعد: ${timeLeft} ثواني`;
                     statusBox.style.backgroundColor = "#475569";
                 } else {
-                    set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
+                    set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0, lockedTeam: '', unlockTime: 0 });
                 }
             }
         }, 100);
 
         window.answerCorrect = function() {
-            set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
+            set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0, lockedTeam: '', unlockTime: 0 });
         };
 
         window.answerWrong = function() {
+            // إضافة 5 ثواني عقوبة
             const unlockTimestamp = getServerTime() + 5000; 
             set(buzzerRef, { 
                 status: 'penalty', 
-                buzzedTeam: '', 
-                buzzedTeamName: '', 
-                buzzedColor: '', 
+                buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0,
                 lockedTeam: currentState.buzzedTeam, 
                 unlockTime: unlockTimestamp 
             });
         };
 
         window.resetBuzzer = function() {
-            set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', lockedTeam: '', unlockTime: 0 });
+            set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0, lockedTeam: '', unlockTime: 0 });
         };
 
-        // دالة فتح بنك الأسئلة في نافذة منبثقة
         window.openQuestions = function() {
-            // يفتح ملف questions.html في نافذة جديدة بحجم مناسب
             window.open('questions.html', '_blank', 'width=800,height=700,scrollbars=yes');
         };
     </script>
 </head>
 <body>
     <div class="header">
-        <button class="questions-btn" onclick="openQuestions()">📖 فتح بنك الأسئلة</button>
+        <button class="questions-btn" onclick="openQuestions()">📖 بنك الأسئلة</button>
         <div class="pin-box">
             <div style="color: #94a3b8; font-size: 1rem;">كود الغرفة</div>
             <div class="pin-display" id="pinDisplay">----</div>
@@ -140,12 +149,12 @@
     <div class="buzzer-status">
         <div id="buzzerStatus">جاري الاتصال...</div>
         <div class="action-btns" id="actionBtns">
-            <button class="action-btn btn-correct" onclick="answerCorrect()">✅ إجابة صحيحة (تحرير)</button>
-            <button class="action-btn btn-wrong" onclick="answerWrong()">❌ خاطئة (عقوبة 5 ثواني)</button>
+            <button class="action-btn btn-correct" onclick="answerCorrect()">✅ صحيحة (تحرير)</button>
+            <button class="action-btn btn-wrong" onclick="answerWrong()">❌ خاطئة (عقوبة 5ث)</button>
         </div>
     </div>
     
-    <button class="reset-btn" onclick="resetBuzzer()">إلغاء أي عقوبة وتحرير يدوي للطوارئ</button>
+    <button class="reset-btn" onclick="resetBuzzer()">إلغاء أي عقوبة وتحرير يدوي</button>
 
     <div class="iframe-container">
         <iframe id="gridFrame"></iframe>
