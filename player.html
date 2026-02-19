@@ -7,23 +7,24 @@
     <style>
         body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden;}
         
-        /* نافذة اختيار اللون */
         #colorModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; gap: 20px;}
         .team-btn { border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 15px; color: white; cursor: pointer; width: 80%; max-width: 300px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);}
         .btn-green { background-color: #4CAF50; border: 3px solid #388E3C; }
         .btn-orange { background-color: #FF9800; border: 3px solid #F57C00; }
 
-        /* شاشة اللعب */
-        #gameScreen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; transition: background-color 0.1s; }
+        #gameScreen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; transition: background-color 0.2s; }
         
-        .status-bar { width: 100%; padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; background: rgba(0,0,0,0.5); z-index: 10;}
+        .status-bar { width: 100%; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.5); z-index: 10;}
         
-        .big-buzzer { flex: 1; width: 90%; margin: 20px; border-radius: 30px; border: none; font-size: 3rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s;}
+        .big-buzzer { flex: 1; width: 90%; margin: 15px; border-radius: 30px; border: none; font-size: 3rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, opacity 0.3s;}
         .big-buzzer:active { transform: scale(0.95); }
-        .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; }
+        .big-buzzer:disabled { opacity: 0.4; cursor: not-allowed; transform: scale(1); }
+        .big-buzzer.penalty { background-color: #475569 !important; border: 3px dashed #ef4444; color: #ef4444;}
 
-        .iframe-container { width: 95%; height: 40vh; margin-bottom: 20px; border-radius: 20px; overflow: hidden; background: white; border: 3px solid #64748b;}
+        .iframe-container { width: 95%; height: 45vh; margin-bottom: 20px; border-radius: 20px; overflow: hidden; background: white; border: 3px solid #64748b;}
         iframe { width: 100%; height: 100%; border: none; }
+        
+        .top-score { width: 100%; display: flex; justify-content: space-around; padding: 10px; background: #0f172a; font-weight: bold;}
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -33,109 +34,175 @@
             apiKey: "AIzaSyB5CobIKfYdAz8jaabJpMQrGoqS9Ton28Y",
             authDomain: "buttons-f3501.firebaseapp.com",
             databaseURL: "https://buttons-f3501-default-rtdb.firebaseio.com",
-            projectId: "buttons-f3501",
-            storageBucket: "buttons-f3501.appspot.com",
-            messagingSenderId: "773064924745",
-            appId: "1:773064924745:web:a6b2260f7947d64227a998"
+            projectId: "buttons-f3501"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // جلب الـ PIN من الرابط
         const urlParams = new URLSearchParams(window.location.search);
         const pin = urlParams.get('pin');
         
+        let myTeamId = "";
         let myColor = "";
         let myTeamName = "";
-        let isRoundActive = true;
+        
+        let serverTimeOffset = 0;
+        let currentBuzzerData = null;
 
-        const roomWinnerRef = ref(db, `rooms/${pin}/winner`);
+        const buzzerRef = ref(db, `rooms/${pin}/buzzer`);
+        const scoreRef = ref(db, `rooms/${pin}/score`);
+        
         const statusBar = document.getElementById('statusBar');
         const gameScreen = document.getElementById('gameScreen');
         const buzzerBtn = document.getElementById('buzzerBtn');
 
-        // تجهيز الـ iframe في وضع القراءة فقط للمشاهدة
         document.getElementById('gridFrame').src = `letters.html?pin=${pin}&role=player`;
 
-        // دالة اختيار الفريق
-        window.selectTeam = function(colorHex, teamName) {
+        // مزامنة الوقت
+        onValue(ref(db, ".info/serverTimeOffset"), (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+        function getServerTime() { return Date.now() + serverTimeOffset; }
+
+        window.selectTeam = function(id, colorHex, teamName) {
+            myTeamId = id;
             myColor = colorHex;
             myTeamName = teamName;
             
             document.getElementById('colorModal').style.display = 'none';
             gameScreen.style.display = 'flex';
-            
             buzzerBtn.style.backgroundColor = myColor;
             buzzerBtn.innerText = teamName;
         };
 
-        // المزامنة الصارمة (الاستماع لقرار السيرفر)
-        onValue(roomWinnerRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const winnerData = snapshot.val();
-                isRoundActive = false;
-                buzzerBtn.disabled = true;
-                
-                // هنا تتغير الشاشة للون الفائز بشكل موحد للجميع
-                gameScreen.style.backgroundColor = winnerData.color;
-                
-                if (winnerData.color === myColor) {
-                    statusBar.innerText = "🏆 فريقك فاز بالضغطة!";
-                } else {
-                    statusBar.innerText = `❌ فاز ${winnerData.team}`;
-                }
-            } else {
-                // جولة جديدة (تم التصفير من الهوست)
-                isRoundActive = true;
-                buzzerBtn.disabled = false;
-                gameScreen.style.backgroundColor = "#1e293b";
-                statusBar.innerText = "🟢 الجولة نشطة.. استعد للضغط!";
+        // عرض النتيجة
+        onValue(scoreRef, (snapshot) => {
+            if(snapshot.exists()) {
+                const s = snapshot.val();
+                document.getElementById('pScoreGreen').innerText = `الأخضر: ${s.green||0}`;
+                document.getElementById('pScoreOrange').innerText = `البرتقالي: ${s.orange||0}`;
             }
         });
 
-        // دالة الضغط (ترسل للسيرفر ولا تغير الشاشة محلياً)
-        window.pressBuzzer = async function() {
-            if (!isRoundActive) return;
+        // الاستماع لحالة الزر والعقوبات
+        onValue(buzzerRef, (snapshot) => {
+            if (snapshot.exists()) {
+                currentBuzzerData = snapshot.val();
+                checkBuzzerState();
+            }
+        });
+
+        function checkBuzzerState() {
+            if (!currentBuzzerData) return;
+
+            // إذا كان شخص ما قد ضغط الزر الآن
+            if (currentBuzzerData.status === 'buzzed') {
+                buzzerBtn.disabled = true;
+                buzzerBtn.classList.remove('penalty');
+                gameScreen.style.backgroundColor = currentBuzzerData.color;
+                
+                if (currentBuzzerData.teamId === myTeamId) {
+                    statusBar.innerText = "🏆 أنت الأسرع! أجب الآن";
+                    buzzerBtn.innerText = "تحدث...";
+                } else {
+                    statusBar.innerText = `❌ ${currentBuzzerData.teamName} يجيب الآن`;
+                    buzzerBtn.innerText = "مغلق";
+                }
+            } 
+            // إذا كان النظام في وضع الانتظار (جاهز للضغط)
+            else if (currentBuzzerData.status === 'waiting') {
+                gameScreen.style.backgroundColor = "#1e293b";
+                
+                // هل فريقي معاقب؟
+                if (currentBuzzerData.lockedTeam === myTeamId) {
+                    const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
+                    if (timeLeft > 0) {
+                        // تطبيق العقوبة
+                        buzzerBtn.disabled = true;
+                        buzzerBtn.classList.add('penalty');
+                        statusBar.innerText = `⚠️ إجابة خاطئة! عقوبة إيقاف مؤقت`;
+                    } else {
+                        // انتهت العقوبة
+                        unlockMyBuzzer();
+                    }
+                } else {
+                    // فريقي غير معاقب، أو عقوبة الفريق الآخر
+                    unlockMyBuzzer();
+                }
+            }
+        }
+
+        function unlockMyBuzzer() {
+            buzzerBtn.disabled = false;
+            buzzerBtn.classList.remove('penalty');
+            buzzerBtn.innerText = myTeamName;
             
-            // تعطيل الزر محلياً لمنع السبام
+            if (currentBuzzerData && currentBuzzerData.lockedTeam && currentBuzzerData.lockedTeam !== myTeamId && currentBuzzerData.lockedTeam !== '') {
+                const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
+                if (timeLeft > 0) {
+                    statusBar.innerText = "🔥 فرصة للسرقة! الخصم معاقب";
+                    return;
+                }
+            }
+            statusBar.innerText = "🟢 جاهز للضغط.. انطلق!";
+        }
+
+        // حلقة تكرار (Loop) للتحكم بعداد الثواني محلياً
+        setInterval(() => {
+            if (currentBuzzerData && currentBuzzerData.status === 'waiting' && currentBuzzerData.lockedTeam === myTeamId) {
+                const timeLeft = Math.ceil((currentBuzzerData.unlockTime - getServerTime()) / 1000);
+                if (timeLeft > 0) {
+                    buzzerBtn.innerText = `عقوبة (${timeLeft})`;
+                } else {
+                    // فك العقوبة بمجرد انتهاء الوقت
+                    checkBuzzerState();
+                }
+            }
+        }, 100);
+
+        // دالة الضغط الصارمة
+        window.pressBuzzer = async function() {
+            if (buzzerBtn.disabled) return;
+            
             buzzerBtn.disabled = true;
-            statusBar.innerText = "جاري التحقق بالملي ثانية ⏳...";
+            statusBar.innerText = "جاري التحقق ⏳...";
 
             try {
-                // السحر هنا: السيرفر يقبل أول طلبية فقط ويرفض الباقي
-                await runTransaction(roomWinnerRef, (currentData) => {
-                    if (currentData === null) {
-                        // أنا الأول! سجل بياناتي
-                        return { color: myColor, team: myTeamName, timestamp: serverTimestamp() };
-                    } else {
-                        // شخص آخر سبقني (تُرفض العملية)
-                        return; 
+                await runTransaction(buzzerRef, (currentData) => {
+                    if (currentData === null || currentData.status === 'waiting') {
+                        // التأكد أنني لست معاقباً في السيرفر أيضاً
+                        if (currentData && currentData.lockedTeam === myTeamId && currentData.unlockTime > getServerTime()) {
+                            return; // أرفض الضغطة
+                        }
+                        return { status: 'buzzed', teamId: myTeamId, teamName: myTeamName, color: myColor, lockedTeam: '', unlockTime: 0 };
                     }
+                    return; // شخص آخر سبقني
                 });
             } catch (error) {
-                console.error("خطأ:", error);
                 buzzerBtn.disabled = false;
             }
         };
 
-        // دعم الضغط باللمس السريع على الجوال
-        buzzerBtn.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            window.pressBuzzer();
-        }, {passive: false});
+        buzzerBtn.addEventListener('touchstart', function(e) { e.preventDefault(); window.pressBuzzer(); }, {passive: false});
 
     </script>
 </head>
 <body>
     <div id="colorModal">
         <h1 style="color:white; margin-bottom: 30px;">اختر فريقك</h1>
-        <button class="team-btn btn-green" onclick="selectTeam('#4CAF50', 'الفريق الأخضر')">الفريق الأخضر</button>
-        <button class="team-btn btn-orange" onclick="selectTeam('#FF9800', 'الفريق البرتقالي')">الفريق البرتقالي</button>
+        <button class="team-btn btn-green" onclick="selectTeam('green', '#4CAF50', 'الفريق الأخضر')">الفريق الأخضر</button>
+        <button class="team-btn btn-orange" onclick="selectTeam('orange', '#FF9800', 'الفريق البرتقالي')">الفريق البرتقالي</button>
     </div>
 
     <div id="gameScreen">
-        <div class="status-bar" id="statusBar">🟢 الجولة نشطة.. استعد للضغط!</div>
+        <div class="top-score">
+            <span id="pScoreGreen" style="color:#4CAF50;">الأخضر: 0</span>
+            <span style="color:#94a3b8;">(الأفضل من 3)</span>
+            <span id="pScoreOrange" style="color:#FF9800;">البرتقالي: 0</span>
+        </div>
+        
+        <div class="status-bar" id="statusBar">🟢 جاهز للضغط.. انطلق!</div>
         
         <button id="buzzerBtn" class="big-buzzer" onclick="pressBuzzer()"></button>
 
