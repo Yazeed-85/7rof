@@ -26,6 +26,7 @@
         .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
         .big-buzzer.penalty { background-color: #334155 !important; border: 4px dashed #ef4444; color: #ef4444; opacity: 1;}
 
+        /* إزالة الخلفية الرمادية من هنا لكي تظهر الخلية بوضوح */
         .iframe-container { width: 100%; max-width: 600px; height: 45vh; margin-bottom: 20px; overflow: hidden; background: transparent; border: none;}
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -156,7 +157,7 @@
         window.pressBuzzer = async function() {
             if (buzzerBtn.disabled) return;
             
-            // تعطيل الزر محلياً بصمت تام (بدون تغيير النصوص أو الشاشة)
+            // تعطيل الزر محلياً بصمت تام (بدون تغيير النصوص أو الشاشة لانتظار السيرفر)
             buzzerBtn.disabled = true;
 
             try {
@@ -178,7 +179,12 @@
             }
         };
 
+        // دعم اللمس السريع للجوالات (بمجرد التلامس)
         buzzerBtn.addEventListener('touchstart', function(e) { e.preventDefault(); window.pressBuzzer(); }, {passive: false});
+        
+        // دعم النقر السريع للكمبيوتر (بمجرد النزول للأسفل mousedown وليس عند الرفع click)
+        buzzerBtn.addEventListener('mousedown', function(e) { e.preventDefault(); window.pressBuzzer(); });
+        
     </script>
 </head>
 <body>
