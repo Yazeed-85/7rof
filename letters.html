@@ -86,11 +86,11 @@
             </linearGradient>
           </defs>
           
-          <rect x="-500" y="-500" width="2000" height="583" fill="#FF9800" />
+          <rect x="-500" y="-500" width="2000" height="600" fill="#FF9800" />
           
-          <rect x="-500" y="83" width="2000" height="272" fill="#2e7d32" />
+          <rect x="-500" y="100" width="2000" height="238" fill="#2e7d32" />
           
-          <rect x="-500" y="355" width="2000" height="500" fill="#FF9800" />
+          <rect x="-500" y="338" width="2000" height="500" fill="#FF9800" />
 
           <g class="hex-cell" data-index="0"><path d="M100,100 L130,83 L160,100 L160,134 L130,151 L100,134 Z" fill="url(#hexGradient)"/><text x="130" y="117" dy="4" font-size="24">أ</text></g>
           <g class="hex-cell" data-index="1"><path d="M160,100 L190,83 L220,100 L220,134 L190,151 L160,134 Z" fill="url(#hexGradient)"/><text x="190" y="117" dy="4" font-size="24">ب</text></g>
@@ -173,7 +173,7 @@
         };
 
         document.querySelectorAll(".hex-cell").forEach((cell) => {
-            // التعديل السحري هنا: استخدام pointerdown بدلاً من click لاستجابة فائقة السرعة
+            // استخدام pointerdown لاستجابة فورية عند الهوست أيضاً
             cell.addEventListener("pointerdown", function(e) {
                 const index = this.getAttribute("data-index");
                 const letter = this.querySelector("text").textContent;
