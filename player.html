@@ -5,22 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>شاشة اللاعب</title>
     <style>
-        /* منع أي هوامش إضافية */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body { 
-            font-family: sans-serif; 
-            background-color: #1e293b; 
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            height: 100vh; 
-            width: 100%; 
-            overflow: hidden; 
-            /* تحسين استجابة اللمس ومنع التكبير */
-            touch-action: manipulation;
-        }
+        body { font-family: sans-serif; background-color: #1e293b; color: white; display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; overflow: hidden; touch-action: manipulation;}
         
         #colorModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; gap: 25px;}
         .team-btn { border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 15px; color: white; cursor: pointer; width: 85%; max-width: 350px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s; touch-action: manipulation;}
@@ -36,26 +22,8 @@
         .dot.online { background-color: #10b981; box-shadow: 0 0 8px #10b981;}
         .status-bar { padding: 15px; text-align: center; font-size: 1.4rem; font-weight: bold; }
         
-        .big-buzzer { 
-            flex: 1; 
-            width: 90%; 
-            max-width: 600px; 
-            margin: 20px auto; 
-            border-radius: 30px; 
-            border: none; 
-            font-size: 3.5rem; 
-            font-weight: bold; 
-            color: white; 
-            cursor: pointer; 
-            box-shadow: 0 15px 25px rgba(0,0,0,0.4); 
-            transition: transform 0.1s, background-color 0.3s; 
-            
-            /* أسرع إعدادات للمس: نلغي أي تأخير للمتصفح */
-            touch-action: none; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none; 
-            -webkit-user-select: none;
-        }
+        /* منع الجوال من الانتظار لتحليل اللمسة، لتكون استجابة الزر لحظية */
+        .big-buzzer { flex: 1; width: 90%; max-width: 600px; margin: 20px auto; border-radius: 30px; border: none; font-size: 3.5rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.3s; touch-action: none; user-select: none; -webkit-user-select: none;}
         .big-buzzer:active { transform: scale(0.95); }
         .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
         .big-buzzer.penalty { background-color: #334155 !important; border: 4px dashed #ef4444; color: #ef4444; opacity: 1;}
@@ -195,12 +163,9 @@
 
         window.pressBuzzer = async function() {
             if (buzzerBtn.disabled) return;
-            
-            // قفل الزر محلياً فوراً لمنع التكرار
             buzzerBtn.disabled = true;
 
             try {
-                // استخدام applyLocally: false لمنع وميض الألوان الكاذب
                 await runTransaction(buzzerRef, (curr) => {
                     if (curr === null) return curr;
                     if (curr.status === 'waiting') {
@@ -216,22 +181,21 @@
             }
         };
 
-        // --- منطقة الأوامر الصارمة (Bare-metal Events) ---
-        
-        // دالة موحدة للتنفيذ، تمنع أي سلوك افتراضي قد يسبب تأخيراً
+        // ==========================================
+        // شيفرة السرعة القصوى للمتصفحات (العدل المطلق)
+        // ==========================================
         const fireBuzzer = function(e) {
-            // منع أي تمرير أو زوم أو قوائم منبثقة
+            // نمنع المتصفح من عمل أي رد فعل افتراضي يضيع أجزاء من الثانية
             if (e && e.cancelable) e.preventDefault(); 
             window.pressBuzzer();
         };
 
-        // 1. للجوال: استجابة فورية عند ملامسة الشاشة (Touchstart)
-        // passive: false ضرورية جداً لإلغاء تأخير التمرير
+        // 1. أسرع استجابة ممكنة للجوالات (اللمس المباشر بدون انتظار)
         buzzerBtn.addEventListener('touchstart', fireBuzzer, {passive: false});
         
-        // 2. للكمبيوتر: استجابة فورية عند نزول الزر (Mousedown)
+        // 2. أسرع استجابة ممكنة للكمبيوتر (نزول زر الماوس فوراً)
         buzzerBtn.addEventListener('mousedown', function(e) {
-            // التأكد أن الضغطة بالزر الأيسر فقط
+            // للتأكد أن الضغطة بالزر الأيسر للماوس فقط (تلافياً للخطأ)
             if (e.button === 0) fireBuzzer(e);
         });
         
