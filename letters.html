@@ -11,13 +11,13 @@
     body { 
         background-color: transparent; 
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        height: 100vh; width: 100vw; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; 
+        height: 100vh; width: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; 
     }
     
     .host-tools { 
-        display: flex; gap: 10px; margin-bottom: 15px; z-index: 100;
-        background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 15px;
-        backdrop-filter: blur(5px);
+        display: flex; gap: 10px; margin-bottom: 10px; z-index: 100;
+        background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 15px;
+        backdrop-filter: blur(5px); justify-content: center; flex-wrap: wrap;
     }
     .tool-btn { padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.1s;}
     .tool-btn:active { transform: scale(0.95); }
@@ -26,12 +26,14 @@
     .btn-shuffle { background: #334155; border: 2px solid #64748b;}
     .selected { box-shadow: 0 0 0 3px #fff, 0 0 15px rgba(255,255,255,0.5); transform: scale(1.05); }
 
-    /* الحاوية الرئيسية - توسيط مطلق وهوامش متساوية */
+    /* الحاوية الرئيسية - تمركز مطلق وهوامش متساوية بالمليمتر */
     .game-board-container {
         position: relative;
-        width: 95%; /* تأخذ 95% من الشاشة لترك هامش بسيط يميناً ويساراً */
+        width: 95%; 
         max-width: 650px; 
-        aspect-ratio: 500 / 480; /* نسبة أبعاد دقيقة لمنع التمطط */
+        max-height: 90vh;
+        /* النسبة الرياضية الدقيقة لتطابق الهوامش (العرض 450 / الطول 392) */
+        aspect-ratio: 450 / 392; 
         border-radius: 15px;
         overflow: hidden;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
@@ -40,7 +42,7 @@
         justify-content: center;
         align-items: center;
         background-color: #2e7d32;
-        margin: 0 auto; /* توسيط أفقي إجباري */
+        margin: 0 auto; /* التمركز الإجباري */
     }
 
     .grid-container { 
@@ -48,8 +50,7 @@
         display: flex; justify-content: center; align-items: center;
     }
 
-    /* منع الفراغات تحت ملفات الـ SVG */
-    svg { display: block; max-width: 100%; max-height: 100%; }
+    svg { display: block; width: 100%; height: 100%; }
 
     .hex-cell { 
         cursor: pointer; 
@@ -80,7 +81,7 @@
 
   <div class="game-board-container">
       <div class="grid-container" id="hexGrid">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -20 500 480" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="10 23 450 392" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
@@ -88,9 +89,11 @@
             </linearGradient>
           </defs>
           
-          <rect x="-500" y="-500" width="2000" height="583" fill="#FF9800" />
-          <rect x="-500" y="83" width="2000" height="272" fill="#2e7d32" />
-          <rect x="-500" y="355" width="2000" height="500" fill="#FF9800" />
+          <rect x="-100" y="-200" width="1000" height="283" fill="#FF9800" />
+          
+          <rect x="-100" y="83" width="1000" height="272" fill="#2e7d32" />
+          
+          <rect x="-100" y="355" width="1000" height="500" fill="#FF9800" />
 
           <g class="hex-cell" data-index="0"><path d="M100,100 L130,83 L160,100 L160,134 L130,151 L100,134 Z" fill="url(#hexGradient)"/><text x="130" y="117" dy="4" font-size="24">أ</text></g>
           <g class="hex-cell" data-index="1"><path d="M160,100 L190,83 L220,100 L220,134 L190,151 L160,134 Z" fill="url(#hexGradient)"/><text x="190" y="117" dy="4" font-size="24">ب</text></g>
