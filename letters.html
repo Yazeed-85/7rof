@@ -24,12 +24,12 @@
     .btn-shuffle { background: #334155; border: 2px solid #64748b;}
     .selected { box-shadow: 0 0 0 3px #fff, 0 0 15px rgba(255,255,255,0.5); transform: scale(1.05); }
 
-    /* الحاوية الرئيسية (تكبير المربع وإعطائه نسبة أبعاد مريحة) */
+    /* الحاوية الرئيسية */
     .game-board-container {
         position: relative;
         width: 95%;
-        max-width: 750px; /* تم تكبير المربع هنا */
-        aspect-ratio: 500 / 480; /* نسبة متوازنة للشكل الجديد */
+        max-width: 750px; 
+        aspect-ratio: 500 / 480; 
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 25px 50px rgba(0,0,0,0.6);
@@ -173,7 +173,8 @@
         };
 
         document.querySelectorAll(".hex-cell").forEach((cell) => {
-            cell.addEventListener("click", function() {
+            // التعديل السحري هنا: استخدام pointerdown بدلاً من click لاستجابة فائقة السرعة
+            cell.addEventListener("pointerdown", function(e) {
                 const index = this.getAttribute("data-index");
                 const letter = this.querySelector("text").textContent;
                 set(ref(database, `rooms/${pin}/grid/${index}`), { letter: letter, color: activePaintColor });
