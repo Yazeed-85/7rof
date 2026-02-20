@@ -22,12 +22,12 @@
         .dot.online { background-color: #10b981; box-shadow: 0 0 8px #10b981;}
         .status-bar { padding: 15px; text-align: center; font-size: 1.4rem; font-weight: bold; }
         
-        .big-buzzer { flex: 1; width: 90%; max-width: 600px; margin: 20px auto; border-radius: 30px; border: none; font-size: 3.5rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.3s; touch-action: manipulation;}
+        /* التعديل السحري هنا: touch-action: none يمنع الجوال من التفكير باللمسة وينفذها كطلقة */
+        .big-buzzer { flex: 1; width: 90%; max-width: 600px; margin: 20px auto; border-radius: 30px; border: none; font-size: 3.5rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.3s; touch-action: none; user-select: none; -webkit-user-select: none;}
         .big-buzzer:active { transform: scale(0.95); }
         .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
         .big-buzzer.penalty { background-color: #334155 !important; border: 4px dashed #ef4444; color: #ef4444; opacity: 1;}
 
-        /* التمركز التام للخلية في جوال اللاعب */
         .iframe-container { 
             width: 95%; max-width: 600px; 
             height: 45vh; min-height: 350px; 
@@ -181,8 +181,11 @@
             }
         };
 
-        buzzerBtn.addEventListener('touchstart', function(e) { e.preventDefault(); window.pressBuzzer(); }, {passive: false});
-        buzzerBtn.addEventListener('mousedown', function(e) { e.preventDefault(); window.pressBuzzer(); });
+        // دمجنا الماوس واللمس في أمر واحد (pointerdown) لتوحيد سرعة الاستجابة تماماً
+        buzzerBtn.addEventListener('pointerdown', function(e) { 
+            e.preventDefault(); 
+            window.pressBuzzer(); 
+        });
         
     </script>
 </head>
@@ -202,7 +205,7 @@
             <div class="status-bar" id="statusBar">يرجى اختيار الفريق...</div>
         </div>
         
-        <button id="buzzerBtn" class="big-buzzer" onclick="pressBuzzer()"></button>
+        <button id="buzzerBtn" class="big-buzzer"></button>
         
         <div class="iframe-container">
             <iframe id="gridFrame"></iframe>
