@@ -5,25 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شاشة الهوست</title>
     <style>
-        body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        * { box-sizing: border-box; } /* لمنع التمدد الخاطئ */
+        body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; width: 100%;}
         .header { display: flex; justify-content: center; width: 100%; max-width: 900px; margin-bottom: 20px; position: relative;}
         
         .pin-box { background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 15px; border: 2px dashed #fbbf24; text-align: center;}
         .pin-display { font-size: 2.5rem; font-weight: bold; color: #fbbf24; letter-spacing: 5px; }
         
-        .buzzer-status { width: 100%; max-width: 600px; padding: 15px; border-radius: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; background: #334155; border: 2px solid #475569; transition: background 0.3s;}
+        .buzzer-status { width: 100%; max-width: 650px; padding: 15px; border-radius: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; background: #334155; border: 2px solid #475569; transition: background 0.3s;}
         
         .action-btns { display: none; gap: 15px; margin-top: 15px; justify-content: center; }
         .action-btn { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; transition: transform 0.2s; }
         .action-btn:active { transform: scale(0.95); }
         .btn-wrong { background: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);}
 
-        /* تعديل حاوية الخلية لكي لا تظهر كصندوق مقفل */
-        .iframe-container { width: 100%; max-width: 600px; height: 420px; border-radius: 15px; overflow: hidden; background: transparent; margin-top: 10px;}
+        /* تعديل الحاوية لتتمركز بالمليمتر في جميع الشاشات */
+        .iframe-container { width: 100%; max-width: 650px; height: 480px; margin: 15px auto; border-radius: 15px; overflow: hidden; background: transparent; display: flex; justify-content: center; align-items: center;}
         iframe { width: 100%; height: 100%; border: none; }
         
-        /* بنك الأسئلة المدمج */
-        .questions-btn { background: linear-gradient(135deg, #2a6496, #1c4c7c); color: white; border: none; padding: 15px; width: 100%; max-width: 600px; font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px;}
+        .questions-btn { background: linear-gradient(135deg, #2a6496, #1c4c7c); color: white; border: none; padding: 15px; width: 100%; max-width: 650px; font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px;}
         .questions-drawer { display: none; width: 100%; max-width: 800px; height: 500px; margin-top: 10px; border-radius: 15px; overflow: hidden; border: 3px solid #2a6496;}
     </style>
     <script type="module">
@@ -81,7 +81,6 @@
             }
         }
 
-        // السيرفر الذكي (يعمل بالنيابة عنك)
         setInterval(() => {
             const now = getServerTime();
             const statusBox = document.getElementById('buzzerStatus');
@@ -89,15 +88,12 @@
             if (currentState.status === 'buzzed') {
                 const timeLeft = Math.ceil((currentState.buzzedTime + 5000 - now) / 1000);
                 if (timeLeft > 0) {
-                    // إظهار العداد بجانب رسالة الضغط للهوست
                     statusBox.innerText = `🚨 ${currentState.buzzedTeamName} يضغط ويجيب الآن! (${timeLeft})`;
                 } else {
-                    // إذا انتهت الـ 5 ثواني العادية ولم يضغط الهوست عقوبة، تُفتح الأزرار تلقائياً
                     set(buzzerRef, { status: 'waiting', buzzedTeam: '', buzzedTeamName: '', buzzedColor: '', buzzedTime: 0, lockedTeam: '', unlockTime: 0 });
                 }
             }
             
-            // عداد العقوبة (10 ثواني)
             if (currentState.status === 'penalty' && currentState.lockedTeam) {
                 const timeLeft = Math.ceil((currentState.unlockTime - now) / 1000);
                 if (timeLeft > 0) {
@@ -111,7 +107,6 @@
         }, 100);
 
         window.answerWrong = function() {
-            // إضافة 10 ثواني عقوبة (الرقم 10000 مللي ثانية)
             const unlockTimestamp = getServerTime() + 10000; 
             set(buzzerRef, { 
                 status: 'penalty', 
