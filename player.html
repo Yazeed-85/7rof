@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>شاشة اللاعب</title>
     <style>
-        * { box-sizing: border-box; } /* لمنع التمدد الخاطئ */
-        body { font-family: sans-serif; background-color: #1e293b; color: white; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; overflow: hidden;}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; background-color: #1e293b; color: white; display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; overflow: hidden; touch-action: manipulation;}
         
         #colorModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; gap: 25px;}
-        .team-btn { border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 15px; color: white; cursor: pointer; width: 85%; max-width: 350px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s;}
+        .team-btn { border: none; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 15px; color: white; cursor: pointer; width: 85%; max-width: 350px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s; touch-action: manipulation;}
         .team-btn:active { transform: scale(0.95); }
         .btn-green { background-color: #4CAF50; border: 4px solid #2E7D32; }
         .btn-orange { background-color: #FF9800; border: 4px solid #E65100; }
@@ -22,13 +22,19 @@
         .dot.online { background-color: #10b981; box-shadow: 0 0 8px #10b981;}
         .status-bar { padding: 15px; text-align: center; font-size: 1.4rem; font-weight: bold; }
         
-        .big-buzzer { flex: 1; width: 90%; max-width: 650px; margin: 20px auto; border-radius: 30px; border: none; font-size: 3.5rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.3s;}
+        .big-buzzer { flex: 1; width: 90%; max-width: 600px; margin: 20px auto; border-radius: 30px; border: none; font-size: 3.5rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 15px 25px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.3s; touch-action: manipulation;}
         .big-buzzer:active { transform: scale(0.95); }
         .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
         .big-buzzer.penalty { background-color: #334155 !important; border: 4px dashed #ef4444; color: #ef4444; opacity: 1;}
 
-        /* التمركز التام للخلية في الجوال */
-        .iframe-container { width: 100%; max-width: 650px; height: 50vh; min-height: 350px; margin: 0 auto 20px auto; overflow: hidden; background: transparent; border: none; display: flex; justify-content: center; align-items: center;}
+        /* التمركز التام للخلية في جوال اللاعب */
+        .iframe-container { 
+            width: 95%; max-width: 600px; 
+            height: 45vh; min-height: 350px; 
+            margin: 0 auto 20px auto; 
+            overflow: hidden; background: transparent; border: none;
+            display: flex; justify-content: center; align-items: center;
+        }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
     <script type="module">
