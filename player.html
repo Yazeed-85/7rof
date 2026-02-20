@@ -26,7 +26,6 @@
         .big-buzzer:disabled { opacity: 0.5; cursor: not-allowed; transform: scale(1); }
         .big-buzzer.penalty { background-color: #334155 !important; border: 4px dashed #ef4444; color: #ef4444; opacity: 1;}
 
-        /* إزالة الخلفية الرمادية من هنا لكي تظهر الخلية بوضوح */
         .iframe-container { width: 100%; max-width: 600px; height: 45vh; margin-bottom: 20px; overflow: hidden; background: transparent; border: none;}
         iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -67,6 +66,10 @@
                 connDot.classList.add('online');
                 connText.innerText = "متصل";
                 connText.style.color = "#10b981";
+            } else {
+                connDot.classList.remove('online');
+                connText.innerText = "جاري الاتصال...";
+                connText.style.color = "#ef4444";
             }
         });
 
@@ -84,7 +87,7 @@
             gameScreen.style.display = 'flex';
             buzzerBtn.style.backgroundColor = myColor;
             buzzerBtn.innerText = teamName;
-            statusBar.innerText = "🟢 انطلق!"; // إصلاح رسالة الانتظار فور اختيار الفريق
+            statusBar.innerText = "🟢 انطلق!"; 
         };
 
         onValue(buzzerRef, (snapshot) => {
@@ -140,7 +143,6 @@
                         buzzerBtn.innerText = "مغلق";
                     }
                 }
-                // تمت إزالة رسالة "انتهى الوقت ننتظر قرار الحكم" لأن الزر سيفتح تلقائيا من جهة الهوست
             }
             
             if (currentState.status === 'penalty' && currentState.lockedTeam === myTeamId) {
@@ -153,9 +155,13 @@
 
         window.pressBuzzer = async function() {
             if (buzzerBtn.disabled) return;
+            
+            // تعطيل الزر محلياً بصمت تام (بدون تغيير النصوص أو الشاشة)
             buzzerBtn.disabled = true;
 
             try {
+                // السطر السحري هنا { applyLocally: false } يمنع الفايربيز من تغيير شاشتك 
+                // حتى يعود الرد الرسمي من السيرفر، مما يمنع وميض الألوان الكاذب تماماً!
                 await runTransaction(buzzerRef, (curr) => {
                     if (curr === null) return curr;
                     if (curr.status === 'waiting') {
@@ -165,8 +171,9 @@
                         return { ...curr, status: 'buzzed', buzzedTeam: myTeamId, buzzedTeamName: myTeamName, buzzedColor: myColor, buzzedTime: getServerTime(), lockedTeam: '', unlockTime: 0 };
                     }
                     return; 
-                });
+                }, { applyLocally: false });
             } catch (error) {
+                // في حال فشل الاتصال بالإنترنت، يعاد فتح الزر
                 buzzerBtn.disabled = false;
             }
         };
