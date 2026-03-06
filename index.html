@@ -3,47 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة وصلة الحروف</title>
+    <title>لعبة وصلة الحروف - الإصدار الحديث</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: rgba(30, 41, 59, 0.9); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 400px; }
-        h1 { color: #f8fafc; margin-bottom: 10px; font-size: 2.2rem;}
-        p { color: #94a3b8; margin-bottom: 30px; }
-        .btn { display: block; width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; color: white; transition: transform 0.2s;}
-        .btn:active { transform: scale(0.95); }
-        .btn-host { background: linear-gradient(135deg, #475569, #334155); border: 1px solid #64748b;}
-        .btn-player { background: linear-gradient(135deg, #4CAF50, #FF9800); }
-        .pin-input { width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; border-radius: 10px; border: 2px solid #64748b; background: #1e293b; color: white; margin-bottom: 15px; box-sizing: border-box;}
-        .player-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        /* إعدادات الخط والجسم */
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            /* خلفية بنفسجية حية ومتحركة */
+            background: linear-gradient(125deg, #1a0b2e, #4b0082, #1a0b2e, #6a0dad);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+
+        /* حركة الخلفية لتعطي حيوية */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* حاوية التصميم الزجاجي */
+        .container { 
+            background: rgba(255, 255, 255, 0.07); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px; 
+            border-radius: 30px; 
+            text-align: center; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            width: 90%; 
+            max-width: 420px;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 { 
+            color: #ffffff; 
+            margin-bottom: 5px; 
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+
+        p { 
+            color: #e2e8f0; 
+            margin-bottom: 35px; 
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* الأزرار الموحدة */
+        .btn { 
+            display: block; 
+            width: 100%; 
+            padding: 16px; 
+            margin-bottom: 18px; 
+            border: none; 
+            border-radius: 15px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* زر الهوست - تدرج ملكي */
+        .btn-host { 
+            background: linear-gradient(135deg, #6d28d9, #4c1d95);
+            box-shadow: 0 8px 15px rgba(109, 40, 217, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-host:hover {
+            box-shadow: 0 12px 25px rgba(109, 40, 217, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* زر اللاعب - يجمع ألوان الفريقين */
+        .btn-player { 
+            background: linear-gradient(135deg, #22c55e, #f59e0b); 
+            box-shadow: 0 8px 15px rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-player:hover {
+            box-shadow: 0 12px 25px rgba(245, 158, 11, 0.3);
+            filter: brightness(1.1);
+        }
+
+        /* حقل إدخال الكود */
+        .pin-input { 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 1.6rem; 
+            text-align: center; 
+            border-radius: 15px; 
+            border: 2px solid rgba(255, 255, 255, 0.1); 
+            background: rgba(15, 23, 42, 0.6); 
+            color: #fbbf24; 
+            margin-bottom: 18px; 
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .pin-input:focus {
+            border-color: #fbbf24;
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .player-section { 
+            margin-top: 30px; 
+            padding-top: 25px; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+        }
+
+        h3 {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* إخفاء سهم الإدخال في حقل الأرقام */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>وصلة الحروف 🚀</h1>
-        <p>الأخضر ضد البرتقالي (Best of 3)</p>
+        <p>تحدي الذكاء والسرعة بين الفريقين</p>
         
         <button class="btn btn-host" onclick="createRoom()">👑 إنشاء غرفة جديدة (الهوست)</button>
         
         <div class="player-section">
-            <h3 style="color: #94a3b8;">للانضمام كلاعب:</h3>
-            <input type="number" id="pinInput" class="pin-input" placeholder="أدخل كود الغرفة (PIN)">
-            <button class="btn btn-player" onclick="joinRoom()">🎮 الدخول كلاعب</button>
+            <h3 style="color: #cbd5e1;">للانضمام كلاعب:</h3>
+            <input type="number" id="pinInput" class="pin-input" placeholder="0000">
+            <button class="btn btn-player" onclick="joinRoom()">🎮 دخول المباراة</button>
         </div>
     </div>
 
     <script>
         function createRoom() {
+            // توليد كود عشوائي من 4 أرقام
             const pin = Math.floor(1000 + Math.random() * 9000);
             window.location.href = `host.html?pin=${pin}`;
         }
+
         function joinRoom() {
             const pin = document.getElementById('pinInput').value;
-            if (pin.length === 4) {
+            if (pin.length >= 4) {
                 window.location.href = `player.html?pin=${pin}`;
             } else {
-                alert("الرجاء إدخال كود غرفة صحيح مكون من 4 أرقام");
+                alert("يرجى إدخال كود الغرفة الصحيح المكون من 4 أرقام");
             }
         }
+
+        // تفعيل الدخول عند الضغط على Enter
+        document.getElementById('pinInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                joinRoom();
+            }
+        });
     </script>
 </body>
 </html>
